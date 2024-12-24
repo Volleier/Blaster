@@ -1,0 +1,49 @@
+# Ignore the intermediate files and build output
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+Build/
+
+# Ignore user-specific files
+*.user
+*.userprefs
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+
+# Ignore project files created by the editor
+.vscode/
+.idea/
+.vs/
+*.sln
+*.suo
+*.xcodeproj
+*.xcworkspace
+*.project
+*.cproject
+*.launch
+*.settings/
+
+# Ignore macOS specific files
+.DS_Store
+
+# Ignore Windows specific files
+Thumbs.db
+
+# Ignore Visual Studio Code specific files
+_ReSharper.Caches/
+
+# Ignore Content
+Content/__ExternalActors__
+Content/__ExternalObjects__
+Content/Assets
+Content/Characters
+Content/Collections
+Content/Developers
+Content/LevelPrototyping
+Content/Maps
+Content/MDL
+Content/ThirdPerson
