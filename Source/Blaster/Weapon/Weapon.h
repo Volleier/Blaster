@@ -32,6 +32,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const override;
 	// 显示或隐藏拾取小部件
 	void ShowPickupWidget(bool bShowWidget);
+	void Fire();
 
 protected:
 	// 游戏开始时调用的函数
@@ -75,6 +76,9 @@ private:
 	// 拾取小部件
 	UPROPERTY(VisibleAnywhere, Category = "武器属性")
 	class UWidgetComponent *PickupWidget;
+
+	UPROPERTY(EditAnywhere,Category = "武器属性")
+	class UAnimationAsset* FireAnimation;
 
 public:
 	// 设置武器状态

@@ -5,7 +5,9 @@
 #include "Components/WidgetComponent.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Net/UnrealNetwork.h"
-
+#include "Animation/AnimationAsset.h"
+#include "Components/SkeletalMeshComponent.h"
+	
 // 设置默认值
 AWeapon::AWeapon()
 {
@@ -102,5 +104,13 @@ void AWeapon::ShowPickupWidget(bool bShowWidget)
 	if (PickupWidget)
 	{
 		PickupWidget->SetVisibility(bShowWidget); // 设置拾取小部件的可见性
+	}
+}
+
+void AWeapon::Fire()
+{
+	if (FireAnimation)
+	{
+		WeaponMesh->PlayAnimation(FireAnimation, false); // 播放开火动画
 	}
 }

@@ -57,9 +57,11 @@ void UCombatComponent::OnRep_EquippedWeapon()
 void UCombatComponent::FireButtonPressed(bool bIsPressed)
 {
 	bFireButtonPressed = bIsPressed;
+	if (EquippedWeapon == nullptr)return;
 	if (Character && bFireButtonPressed)
 	{
 		Character->PlayFireMonatge(bAiming);
+		EquippedWeapon->Fire();
 	}
 }
 
