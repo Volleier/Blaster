@@ -35,10 +35,15 @@ protected:
 
 	void FireButtonPressed(bool bIsPressed);
 
+	UFUNCTION(Server,Reliable)
+	void ServerFire();
+
+	UFUNCTION(NetMulticast,Reliable)
+	void MulticastFire();
+
 private:
 	// 角色指针
-	class ABlasterCharacter *Character;
-
+	class ABlasterCharacter* Character;
 	// 装备的武器，使用OnRep_EquippedWeapon进行同步
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon *EquippedWeapon;

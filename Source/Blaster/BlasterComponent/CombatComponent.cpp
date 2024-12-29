@@ -16,6 +16,14 @@ UCombatComponent::UCombatComponent()
 	AimWalkSpeed = 450.f;  // 瞄准行走速度
 }
 
+void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UCombatComponent, EquippedWeapon); // 复制装备的武器
+	DOREPLIFETIME(UCombatComponent, bAiming);		 // 复制瞄准状态
+}
+
 void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -54,28 +62,33 @@ void UCombatComponent::OnRep_EquippedWeapon()
 	}
 }
 
-void UCombatComponent::FireButtonPressed(bool bIsPressed)
-{
-	bFireButtonPressed = bIsPressed;
-	if (EquippedWeapon == nullptr)return;
-	if (Character && bFireButtonPressed)
-	{
-		Character->PlayFireMonatge(bAiming);
-		EquippedWeapon->Fire();
-	}
-}
-
-void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
+void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
+void UCombatComponent::FireButtonPressed(bool bIsPressed)
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	bFireButtonPressed = bIsPressed;
+	if (bFireButtonPressed)
+	{
+		ServerFire();
+	}
+}
 
-	DOREPLIFETIME(UCombatComponent, EquippedWeapon); // 复制装备的武器
-	DOREPLIFETIME(UCombatComponent, bAiming);		 // 复制瞄准状态
+void UCombatComponent::ServerFire_Implementation()
+{
+	MulticastFire();
+}
+
+void UCombatComponent::MulticastFire_Implementation()
+{
+	if (EquippedWeapon == nullptr)return;
+	if (Character)
+	{
+		Character->PlayFireMonatge(bAiming);
+		EquippedWeapon->Fire();
+	}
 }
 
 void UCombatComponent::EquipWeapon(AWeapon *WeaponToEquip)
