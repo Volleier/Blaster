@@ -8,7 +8,6 @@
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "DrawDebugHelpers.h"
 
 // 战斗组件构造函数
 UCombatComponent::UCombatComponent()
@@ -123,13 +122,8 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult &TraceHitResult)
 			TraceHitResult,
 			Start,
 			End,
-			ECollisionChannel::ECC_Visibility);
-		DrawDebugSphere(
-			GetWorld(),
-			TraceHitResult.ImpactPoint,
-			12.f,
-			12,
-			FColor::Red);
+			ECollisionChannel::ECC_Visibility
+		);
 	}
 }
 
