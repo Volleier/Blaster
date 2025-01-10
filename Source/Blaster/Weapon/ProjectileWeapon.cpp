@@ -20,8 +20,7 @@ void AProjectileWeapon::Fire(const FVector &HitTarget)
 		FVector SocketLocation = SocketTransform.GetLocation();
 
 		// to-do fix the problem of the socket location
-			SocketLocation.Z += 100.f;
-			SocketTransform.SetLocation(SocketLocation);
+
 		
 		UE_LOG(LogTemp, Warning, TEXT("Weapon Socket Location: X=%f, Y=%f, Z=%f"),
 			   SocketLocation.X, SocketLocation.Y, SocketLocation.Z);
