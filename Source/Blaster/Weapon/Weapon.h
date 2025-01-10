@@ -80,6 +80,9 @@ private:
 	UPROPERTY(EditAnywhere,Category = "武器属性")
 	class UAnimationAsset* FireAnimation;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ACasing>CasingClass;
+
 public:
 	// 设置武器状态
 	void SetWeaponState(EWeaponState State);
