@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Projectile.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
@@ -43,12 +42,12 @@ void AProjectile::BeginPlay()
 			FName(),
 			GetActorLocation(),
 			GetActorRotation(),
-			EAttachLocation::KeepWorldPosition
-		);
+			EAttachLocation::KeepWorldPosition);
 	}
 }
 
-void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
+// 子弹碰撞后销毁
+void AProjectile::OnHit(UPrimitiveComponent *HitComponent, AActor *OtherActor, UPrimitiveComponent *OtherComponent, FVector NormalImpulse, const FHitResult &Hit)
 {
 	Destroy();
 }
@@ -56,9 +55,9 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 void AProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
+// 重写销毁函数
 void AProjectile::Destroyed()
 {
 	Super::Destroyed();

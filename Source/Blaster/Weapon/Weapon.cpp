@@ -7,7 +7,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Animation/AnimationAsset.h"
 #include "Components/SkeletalMeshComponent.h"
-	
+
 // 设置默认值
 AWeapon::AWeapon()
 {
@@ -52,13 +52,15 @@ void AWeapon::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+// 注册需要复制的属性
 void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AWeapon, WeaponState); // 注册需要复制的属性
+	DOREPLIFETIME(AWeapon, WeaponState);
 }
 
+// 设置武器状态
 void AWeapon::OnSphereOverlap(UPrimitiveComponent *OverlappedComponent, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
 {
 	ABlasterCharacter *BlasterCharacter = Cast<ABlasterCharacter>(OtherActor); // 将重叠的Actor转换为BlasterCharacter
@@ -68,6 +70,7 @@ void AWeapon::OnSphereOverlap(UPrimitiveComponent *OverlappedComponent, AActor *
 	}
 }
 
+// 清除重叠的武器
 void AWeapon::OnSphereEndOverlap(UPrimitiveComponent *OverlappedComponent, AActor *OtherActor, UPrimitiveComponent *OtherComp, int32 OtherBodyIndex)
 {
 	ABlasterCharacter *BlasterCharacter = Cast<ABlasterCharacter>(OtherActor); // 将重叠的Actor转换为BlasterCharacter
@@ -77,6 +80,7 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent *OverlappedComponent, AActo
 	}
 }
 
+// 设置武器状态
 void AWeapon::SetWeaponState(EWeaponState State)
 {
 	WeaponState = State; // 设置武器状态
@@ -89,6 +93,7 @@ void AWeapon::SetWeaponState(EWeaponState State)
 	}
 }
 
+// 复制武器状态
 void AWeapon::OnRep_WeaponState()
 {
 	switch (WeaponState)
@@ -99,6 +104,7 @@ void AWeapon::OnRep_WeaponState()
 	}
 }
 
+// 显示或隐藏拾取小部件
 void AWeapon::ShowPickupWidget(bool bShowWidget)
 {
 	if (PickupWidget)
@@ -107,7 +113,8 @@ void AWeapon::ShowPickupWidget(bool bShowWidget)
 	}
 }
 
-void AWeapon::Fire(const FVector& HitTargets)
+// 开火
+void AWeapon::Fire(const FVector &HitTargets)
 {
 	if (FireAnimation)
 	{

@@ -73,12 +73,6 @@ void UCombatComponent::OnRep_EquippedWeapon()
 	}
 }
 
-// 组件的Tick函数，每帧更新
-void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-}
-
 // 处理开火按钮的按下状态
 void UCombatComponent::FireButtonPressed(bool bIsPressed)
 {
@@ -143,6 +137,12 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize &T
 		Character->PlayFireMonatge(bAiming);  // 播放开火动画
 		EquippedWeapon->Fire(TraceHitTarget); // 执行武器的开火逻辑
 	}
+}
+
+// 组件的Tick函数，每帧更新
+void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
 // 装备武器
