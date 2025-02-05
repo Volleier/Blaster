@@ -4,10 +4,11 @@
 #include "Blaster/Weapon/Weapon.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Engine/SkeletalMeshSocket.h"
-#include "Components/SphereComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Blaster/PlayerController/BlasterPlayerController.h"
+#include "Blaster/HUD/BlasterHUD.h"
 
 // 战斗组件构造函数
 UCombatComponent::UCombatComponent()
@@ -36,6 +37,44 @@ void UCombatComponent::BeginPlay()
 	{
 		// 初始化角色的行走速度为基础速度
 		Character->GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+	}
+}
+
+void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	SetHUDCrosshairs(DeltaTime);
+}
+
+void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
+{
+	if (Character == nullptr || Character->Controller == nullptr) return;
+	Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+	if (Controller)
+	{
+		HUD = HUD == nullptr ? Cast<ABlasterHUD>(Controller->GetHUD()) : HUD;
+		if (HUD)
+		{
+			FHUDPackage HUDPackage;
+			if (EquippedWeapon)
+			{
+				HUDPackage.CrosshairsCenter = EquippedWeapon->CrosshairsCenter;
+				HUDPackage.CrosshairsLeft = EquippedWeapon->CrosshairsLeft;
+				HUDPackage.CrosshairsRight = EquippedWeapon->CrosshairsRight;
+				HUDPackage.CrosshairsBottom = EquippedWeapon->CrosshairsBottom;
+				HUDPackage.CrosshairsTop = EquippedWeapon->CrosshairsTop;
+			}
+			else
+			{
+				HUDPackage.CrosshairsCenter = nullptr;
+				HUDPackage.CrosshairsLeft = nullptr;
+				HUDPackage.CrosshairsRight = nullptr;
+				HUDPackage.CrosshairsBottom = nullptr;
+				HUDPackage.CrosshairsTop = nullptr;
+			}
+			HUD->SetHUDPackage(HUDPackage);
+		}
 	}
 }
 
@@ -137,12 +176,6 @@ void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize &T
 		Character->PlayFireMonatge(bAiming);  // 播放开火动画
 		EquippedWeapon->Fire(TraceHitTarget); // 执行武器的开火逻辑
 	}
-}
-
-// 组件的Tick函数，每帧更新
-void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
 // 装备武器

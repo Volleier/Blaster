@@ -45,9 +45,13 @@ protected:
 
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
+	void SetHUDCrosshairs(float DeltaTime);
 private:
 	// 角色指针
 	class ABlasterCharacter* Character;
+	class ABlasterPlayerController* Controller;
+	class ABlasterHUD* HUD;
+
 	// 装备的武器，使用OnRep_EquippedWeapon进行同步
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon *EquippedWeapon;

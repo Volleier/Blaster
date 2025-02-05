@@ -34,6 +34,24 @@ public:
 	void ShowPickupWidget(bool bShowWidget);
 	virtual void Fire(const FVector& HitTarget);
 
+	/*
+	* 武器材质准心
+	*/
+	UPROPERTY(EditAnywhere, Category = Crosshairs)
+	class UTexture2D* CrosshairsCenter;
+
+	UPROPERTY(EditAnywhere, Category = Crosshairs)
+	UTexture2D* CrosshairsLeft;
+
+	UPROPERTY(EditAnywhere, Category = Crosshairs)
+	UTexture2D* CrosshairsRight;
+
+	UPROPERTY(EditAnywhere, Category = Crosshairs)
+	UTexture2D* CrosshairsTop;
+
+	UPROPERTY(EditAnywhere, Category = Crosshairs)
+	UTexture2D* CrosshairsBottom;
+
 protected:
 	// 游戏开始时调用的函数
 	virtual void BeginPlay() override;
