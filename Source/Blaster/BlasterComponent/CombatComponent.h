@@ -70,5 +70,9 @@ private:
 
 	// 是否按下开火键
 	bool bFireButtonPressed;
+
+	// 设置准星的HUDPackage
+	float CrosshairVelocityFactor;
+	float CrosshairInAirFactor;
 public:
 };
