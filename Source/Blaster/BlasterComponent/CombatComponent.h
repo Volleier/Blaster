@@ -74,5 +74,7 @@ private:
 	// 设置准星的HUDPackage
 	float CrosshairVelocityFactor;
 	float CrosshairInAirFactor;
+
+	FVector HitTarget;
 public:
 };
