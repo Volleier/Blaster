@@ -52,6 +52,15 @@ public:
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
 	UTexture2D* CrosshairsBottom;
 
+	/*
+	 * Zoomed FOV while aiming
+	 */
+	UPROPERTY(EditAnywhere)
+	float ZoomedFOV = 30.f;
+
+	UPROPERTY(EditAnywhere)
+	float ZoomInterSpeed = 20.f;
+
 protected:
 	// 游戏开始时调用的函数
 	virtual void BeginPlay() override;
@@ -108,4 +117,8 @@ public:
 	FORCEINLINE USphereComponent *GetAreaSphere() const { return AreaSphere; }
 	// 获取武器的骨骼网格组件
 	FORCEINLINE USkeletalMeshComponent *GetWeaponMesh() const { return WeaponMesh; }
+	// 获取FOV
+	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
+	// 获取缩放插值速度
+	FORCEINLINE float GetZoomInterSpeed() const { return ZoomInterSpeed; }
 };
