@@ -20,6 +20,9 @@ public:
 	// 更新动画
 	virtual void NativeUpdateAnimation(float DeltaTime) override;
 
+	// 装备的武器
+	class AWeapon* EquippedWeapon;
+
 private:
 	// Blaster角色
 	UPROPERTY(BlueprintReadOnly, Category = Character, meta = (AllowPrivateAccess = "true"))
@@ -40,9 +43,6 @@ private:
 	// 是否装备武器
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	bool bWeaponEquipped;
-
-	// 装备的武器
-	class AWeapon *EquippedWeapon;
 
 	// 是否蹲下
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
