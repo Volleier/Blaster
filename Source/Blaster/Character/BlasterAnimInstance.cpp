@@ -86,13 +86,23 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 		{
 			bLocallyControlled = true;
 			FTransform MuzzleTipTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("MuzzleFlash"), ERelativeTransformSpace::RTS_World);
-			DrawDebugLine(
-				GetWorld(),
-				MuzzleTipTransform.GetLocation(),
-				BlasterCharacter->GetHitTarget(),
-				FColor::Orange
+			// 绘制射线
+			//DrawDebugLine(
+			//	GetWorld(), 
+			//	MuzzleTipTransform.GetLocation(),
+			//	BlasterCharacter->GetHitTarget(),
+			//	FColor::Orange
+			// );
+			FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(
+				RightHandTransform.GetLocation(), 
+				RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget())
 			);
-
+			RightHandRotation = FMath::RInterpTo(
+				RightHandRotation, 
+				LookAtRotation, 
+				DeltaTime, 
+				30.f
+			);
 		}
 	}
 }
