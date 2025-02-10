@@ -74,13 +74,15 @@ private:
 	// 设置准星的HUDPackage
 	float CrosshairVelocityFactor;
 	float CrosshairInAirFactor;
+	float CrosshairAimFactor;
+	float CrosshairShootingFactor;
 
 	FVector HitTarget;
 
 	/*
-	 * Aiming and FOV
+	 * 瞄准和FOV
 	 */
-	//Field of view when not aiming; set to the camera's base FOV in beginPlay
+    // 未瞄准时的视野范围；在BeginPlay中设置为相机的基础视野范围
 	float DefaultFOV;
 
 	UPROPERTY(EditAnywhere,Category = Combat)	
