@@ -10,6 +10,7 @@
 #include "Blaster/PlayerController/BlasterPlayerController.h"
 #include "Blaster/HUD/BlasterHUD.h"
 #include "Camera/CameraComponent.h"
+#include "TimerManager.h"
 
 // 战斗组件构造函数
 UCombatComponent::UCombatComponent()
@@ -20,6 +21,7 @@ UCombatComponent::UCombatComponent()
 	BaseWalkSpeed = 600.f; // 设置角色的基础行走速度
 	AimWalkSpeed = 450.f;  // 设置角色瞄准时的行走速度
 }
+
 // 设置需要在网络中复制的属性
 void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
 {
@@ -183,6 +185,27 @@ void UCombatComponent::InterFOV(float DeltaTime)
 	}
 }
 
+void UCombatComponent::StartFireTimer()
+{
+	if (EquippedWeapon == nullptr || Character == nullptr) return;
+	Character->GetWorldTimerManager().SetTimer(
+		FireTimer,
+		this,
+		&UCombatComponent::FireTimerFinished,
+		EquippedWeapon->FireDelay
+	);
+}
+
+void UCombatComponent::FireTimerFinished()
+{
+	if (EquippedWeapon == nullptr) return;
+	bCanFire = true;
+	if (bFireButtonPressed && EquippedWeapon->bAutomatic)
+	{
+		Fire();
+	}
+}
+
 // 设置瞄准状态
 void UCombatComponent::SetAiming(bool bIsAiming)
 {
@@ -218,20 +241,26 @@ void UCombatComponent::OnRep_EquippedWeapon()
 }
 
 // 处理开火按钮的按下状态
-void UCombatComponent::FireButtonPressed(bool bIsPressed)
+void UCombatComponent::FireButtonPressed(bool bPressed)
 {
-	bFireButtonPressed = bIsPressed;
+	bFireButtonPressed = bPressed;
 	if (bFireButtonPressed)
 	{
-		FHitResult HitResult;
-		TraceUnderCrosshairs(HitResult);   // 进行准星下的射线检测
-		ServerFire(HitResult.ImpactPoint); // 在服务器上处理开火事件
+		Fire();
+	}
+}
 
-		// 设置准星扩散因子
+void UCombatComponent::Fire()
+{
+	if (bCanFire)
+	{
+		bCanFire = false;
+		ServerFire(HitTarget);
 		if (EquippedWeapon)
 		{
-			CrosshairShootingFactor = 0.8f;
+			CrosshairShootingFactor = .75f;
 		}
+		StartFireTimer();
 	}
 }
 

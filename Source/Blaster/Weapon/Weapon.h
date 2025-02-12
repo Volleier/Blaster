@@ -53,13 +53,21 @@ public:
 	UTexture2D* CrosshairsBottom;
 
 	/*
-	 * Zoomed FOV while aiming
+	 * 瞄准放大FOV
 	 */
 	UPROPERTY(EditAnywhere)
 	float ZoomedFOV = 30.f;
 
 	UPROPERTY(EditAnywhere)
 	float ZoomInterSpeed = 20.f;
+
+	/*
+	 * 自动开火
+	 */
+	UPROPERTY(EditAnywhere, Category = Combat)
+	float FireDelay = .15f;
+	UPROPERTY(EditAnywhere, Category = Combat)
+	bool bAutomatic = true;
 
 protected:
 	// 游戏开始时调用的函数
