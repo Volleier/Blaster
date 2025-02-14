@@ -124,22 +124,20 @@ void AWeapon::Fire(const FVector &HitTargets)
 	}
 	if (CasingClass)
 	{
-		const USkeletalMeshSocket* AmmoEjectSocket = WeaponMesh->GetSocketByName(FName("AmmoEject"));
+		const USkeletalMeshSocket *AmmoEjectSocket = WeaponMesh->GetSocketByName(FName("AmmoEject"));
 		if (AmmoEjectSocket)
 		{
 			FTransform SocketTransform = AmmoEjectSocket->GetSocketTransform(WeaponMesh);
 
 			FActorSpawnParameters SpawnParams;
-			UWorld* World = GetWorld();
+			UWorld *World = GetWorld();
 			if (World)
 			{
 				World->SpawnActor<ACasing>(
 					CasingClass,
 					SocketTransform.GetLocation(),
-					SocketTransform.GetRotation().Rotator()
-				);
+					SocketTransform.GetRotation().Rotator());
 			}
 		}
-
 	}
 }

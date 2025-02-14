@@ -36,24 +36,31 @@ protected:
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
 
+	// 处理开火按钮按下事件
 	void FireButtonPressed(bool bIsPressed);
 
+	// 执行开火操作
 	void Fire();
 
-	UFUNCTION(Server,Reliable)
-	void ServerFire(const FVector_NetQuantize& TraceHitTarget);
+	// 服务器端处理开火请求
+	UFUNCTION(Server, Reliable)
+	void ServerFire(const FVector_NetQuantize &TraceHitTarget);
 
-	UFUNCTION(NetMulticast,Reliable)
-	void MulticastFire(const FVector_NetQuantize& TraceHitTarget);
+	// 多播开火事件
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastFire(const FVector_NetQuantize &TraceHitTarget);
 
-	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
+	// 在准星下进行射线检测
+	void TraceUnderCrosshairs(FHitResult &TraceHitResult);
 
+	// 设置HUD准星
 	void SetHUDCrosshairs(float DeltaTime);
+
 private:
 	// 角色指针
-	class ABlasterCharacter* Character;
-	class ABlasterPlayerController* Controller;
-	class ABlasterHUD* HUD;
+	class ABlasterCharacter *Character;
+	class ABlasterPlayerController *Controller;
+	class ABlasterHUD *HUD;
 
 	// 装备的武器，使用OnRep_EquippedWeapon进行同步
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
@@ -80,33 +87,42 @@ private:
 	float CrosshairAimFactor;
 	float CrosshairShootingFactor;
 
+	// 击中目标的位置
 	FVector HitTarget;
 
+	// HUD包，用于设置准星
 	FHUDPackage HUDPackage;
 
 	/*
 	 * 瞄准和FOV
 	 */
-    // 未瞄准时的视野范围；在BeginPlay中设置为相机的基础视野范围
+	// 未瞄准时的视野范围；在BeginPlay中设置为相机的基础视野范围
 	float DefaultFOV;
 
-	UPROPERTY(EditAnywhere,Category = Combat)	
+	// 瞄准时的视野范围
+	UPROPERTY(EditAnywhere, Category = Combat)
 	float ZoomedFOV = 30.f;
 
+	// 当前的视野范围
 	float CurrentFOV;
 
+	// 瞄准时视野变化的插值速度
 	UPROPERTY(EditAnywhere, Category = Combat)
 	float ZoomInterSpeed = 20.f;
 
+	// 插值更新视野范围
 	void InterFOV(float DeltaTime);
 
 	/*
 	 * 自动开火
 	 */
+	// 开火计时器句柄
 	FTimerHandle FireTimer;
+	// 是否可以开火
 	bool bCanFire = true;
 
+	// 开始开火计时器
 	void StartFireTimer();
+	// 开火计时器结束
 	void FireTimerFinished();
-public:
 };

@@ -28,8 +28,8 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 
 	// 获取角色速度并计算速度大小
 	FVector Velocity = BlasterCharacter->GetVelocity();
-	Velocity.Z = 0.f;
-	Speed = Velocity.Size();
+	Velocity.Z = 0.f;		 // 忽略Z轴速度
+	Speed = Velocity.Size(); // 计算速度大小
 
 	// 判断角色是否在空中
 	bIsInAir = BlasterCharacter->GetCharacterMovement()->IsFalling();
@@ -49,19 +49,19 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bRotateRootBone = BlasterCharacter->ShouldRotateRootBone();
 
 	// 计算偏移偏航角用于侧移
-	FRotator AimRotation = BlasterCharacter->GetBaseAimRotation();
-	FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(BlasterCharacter->GetVelocity());
-	FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation, AimRotation);
-	DeltaRotation = FMath::RInterpTo(DeltaRotation, DeltaRot, DeltaTime, 6.f);
-	YawOffset = DeltaRotation.Yaw;
+	FRotator AimRotation = BlasterCharacter->GetBaseAimRotation();								   // 获取角色的基础瞄准旋转
+	FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(BlasterCharacter->GetVelocity()); // 根据速度向量计算旋转
+	FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation, AimRotation); // 计算旋转差值
+	DeltaRotation = FMath::RInterpTo(DeltaRotation, DeltaRot, DeltaTime, 6.f);					   // 插值计算新的旋转差值
+	YawOffset = DeltaRotation.Yaw;																   // 设置偏航角度
 
 	// 计算角色的倾斜角度
-	CharacterRotationLastFrame = CharacterRotation;
-	CharacterRotation = BlasterCharacter->GetActorRotation();
-	const FRotator Delta = UKismetMathLibrary::NormalizedDeltaRotator(CharacterRotation, CharacterRotationLastFrame);
-	const float Target = Delta.Yaw / DeltaTime;
-	const float Interp = FMath::FInterpTo(Lean, Target, DeltaTime, 6.f);
-	Lean = FMath::Clamp(Interp, -90.f, 90.f);
+	CharacterRotationLastFrame = CharacterRotation;																	  // 保存上一帧的角色旋转
+	CharacterRotation = BlasterCharacter->GetActorRotation();														  // 获取当前角色旋转
+	const FRotator Delta = UKismetMathLibrary::NormalizedDeltaRotator(CharacterRotation, CharacterRotationLastFrame); // 计算旋转差值
+	const float Target = Delta.Yaw / DeltaTime;																		  // 计算目标倾斜角度
+	const float Interp = FMath::FInterpTo(Lean, Target, DeltaTime, 6.f);											  // 插值计算新的倾斜角度
+	Lean = FMath::Clamp(Interp, -90.f, 90.f);																		  // 限制倾斜角度范围
 
 	// 获取角色的瞄准偏航角和俯仰角
 	AO_Yaw = BlasterCharacter->GetAO_Yaw();
@@ -74,37 +74,34 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 		LeftHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("LeftHandSocket"), ERelativeTransformSpace::RTS_World);
 		FVector OutPosition;
 		FRotator OutRotation;
-		BlasterCharacter->GetMesh()->TransformToBoneSpace(FName("hand_r"), LeftHandTransform.GetLocation(), FRotator::ZeroRotator, OutPosition, OutRotation);
-		LeftHandTransform.SetLocation(OutPosition);
-		LeftHandTransform.SetRotation(FQuat(OutRotation));
+		BlasterCharacter->GetMesh()->TransformToBoneSpace(FName("hand_r"), LeftHandTransform.GetLocation(), FRotator::ZeroRotator, OutPosition, OutRotation); // 转换到骨骼空间
+		LeftHandTransform.SetLocation(OutPosition);																											  // 设置左手位置
+		LeftHandTransform.SetRotation(FQuat(OutRotation));																									  // 设置左手旋转
 
-		FTransform RightHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("Hand_R"), ERelativeTransformSpace::RTS_World);
+		FTransform RightHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("Hand_R"), ERelativeTransformSpace::RTS_World); // 获取右手变换信息
 		RightHandRotation = UKismetMathLibrary::FindLookAtRotation(
 			RightHandTransform.GetLocation(),
-			RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget())
-			);
+			RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget())); // 计算右手旋转
 
 		if (BlasterCharacter->IsLocallyControlled())
 		{
-			bLocallyControlled = true;
-			FTransform MuzzleTipTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("MuzzleFlash"), ERelativeTransformSpace::RTS_World);
+			bLocallyControlled = true;																													   // 设置本地控制标志
+			FTransform MuzzleTipTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("MuzzleFlash"), ERelativeTransformSpace::RTS_World); // 获取枪口变换信息
 			// 绘制射线
-			//DrawDebugLine(
-			//	GetWorld(), 
+			// DrawDebugLine(
+			//	GetWorld(),
 			//	MuzzleTipTransform.GetLocation(),
 			//	BlasterCharacter->GetHitTarget(),
 			//	FColor::Orange
 			// );
 			FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(
-				RightHandTransform.GetLocation(), 
-				RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget())
-			);
+				RightHandTransform.GetLocation(),
+				RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget())); // 计算瞄准旋转
 			RightHandRotation = FMath::RInterpTo(
-				RightHandRotation, 
-				LookAtRotation, 
-				DeltaTime, 
-				30.f
-			);
+				RightHandRotation,
+				LookAtRotation,
+				DeltaTime,
+				30.f); // 插值计算新的右手旋转
 		}
 	}
 }

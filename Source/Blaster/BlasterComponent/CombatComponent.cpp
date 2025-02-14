@@ -49,23 +49,26 @@ void UCombatComponent::BeginPlay()
 	}
 }
 
-void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+// 每帧更新组件
+void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	if (Character && Character->IsLocallyControlled())
 	{
 		FHitResult HitResult;
-		TraceUnderCrosshairs(HitResult);
-		HitTarget = HitResult.ImpactPoint;
-		SetHUDCrosshairs(DeltaTime);
-		InterFOV(DeltaTime);
+		TraceUnderCrosshairs(HitResult);   // 在准星位置进行射线检测
+		HitTarget = HitResult.ImpactPoint; // 获取射线检测的命中点
+		SetHUDCrosshairs(DeltaTime);	   // 设置HUD准星
+		InterFOV(DeltaTime);			   // 插值计算视野
 	}
 }
 
+// 设置HUD准星
 void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 {
-	if (Character == nullptr || Character->Controller == nullptr) return;
+	if (Character == nullptr || Character->Controller == nullptr)
+		return;
 	Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
 	if (Controller)
 	{
@@ -74,6 +77,7 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 		{
 			if (EquippedWeapon)
 			{
+				// 设置准星纹理
 				HUDPackage.CrosshairsCenter = EquippedWeapon->CrosshairsCenter;
 				HUDPackage.CrosshairsLeft = EquippedWeapon->CrosshairsLeft;
 				HUDPackage.CrosshairsRight = EquippedWeapon->CrosshairsRight;
@@ -88,7 +92,7 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 				HUDPackage.CrosshairsBottom = nullptr;
 				HUDPackage.CrosshairsTop = nullptr;
 			}
-			//计算准星扩散
+			// 计算准星扩散
 			// [0,600]->[0,1]
 			FVector2D WalkSpeedRange(0.f, Character->GetCharacterMovement()->MaxWalkSpeed);
 			FVector2D VelocityMultiplierRange(0.f, 1.f);
@@ -98,35 +102,33 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 			CrosshairVelocityFactor = FMath::GetMappedRangeValueClamped(
 				WalkSpeedRange,
 				VelocityMultiplierRange,
-				Velocity.Size()
-			);
+				Velocity.Size());
 
+			// 根据角色是否在空中调整准星扩散
 			if (Character->GetCharacterMovement()->IsFalling())
 			{
 				CrosshairInAirFactor = FMath::FInterpTo(
 					CrosshairInAirFactor,
 					2.25f,
-					DeltaTime, 
-					2.25f
-				);
+					DeltaTime,
+					2.25f);
 			}
 			else
 			{
 				CrosshairInAirFactor = FMath::FInterpTo(
 					CrosshairInAirFactor,
-					0.f, 
+					0.f,
 					DeltaTime,
-					30.f
-				);
+					30.f);
 			}
+			// 根据瞄准状态调整准星扩散
 			if (bAiming)
 			{
 				CrosshairAimFactor = FMath::FInterpTo(
 					CrosshairAimFactor,
 					0.5f,
 					DeltaTime,
-					30.f
-				);
+					30.f);
 			}
 			else
 			{
@@ -134,75 +136,82 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 					CrosshairAimFactor,
 					0.f,
 					DeltaTime,
-					30.f
-				);
+					30.f);
 			}
 
+			// 根据射击状态调整准星扩散
 			CrosshairShootingFactor = FMath::FInterpTo(
 				CrosshairShootingFactor,
 				0.f,
 				DeltaTime,
-				40.f
-			);
+				40.f);
 
+			// 计算最终的准星扩散值
 			HUDPackage.CrosshairSpread =
 				0.5f +
-				CrosshairVelocityFactor + 
+				CrosshairVelocityFactor +
 				CrosshairInAirFactor -
 				CrosshairAimFactor +
 				CrosshairShootingFactor;
 
+			// 更新HUD的准星包
 			HUD->SetHUDPackage(HUDPackage);
 		}
 	}
 }
 
+// 插值计算视野
 void UCombatComponent::InterFOV(float DeltaTime)
 {
-	if (EquippedWeapon == nullptr) return;
+	if (EquippedWeapon == nullptr)
+		return;
 
 	if (bAiming)
 	{
+		// 瞄准时插值到武器的缩放视野
 		CurrentFOV = FMath::FInterpTo(
 			CurrentFOV,
 			EquippedWeapon->GetZoomedFOV(),
 			DeltaTime,
-			EquippedWeapon->GetZoomInterSpeed()
-		);
+			EquippedWeapon->GetZoomInterSpeed());
 	}
 	else
 	{
+		// 非瞄准时插值到默认视野
 		CurrentFOV = FMath::FInterpTo(
 			CurrentFOV,
 			DefaultFOV,
 			DeltaTime,
-			ZoomInterSpeed
-		);
+			ZoomInterSpeed);
 	}
 	if (Character && Character->GetFollowCamera())
 	{
+		// 设置角色相机的视野
 		Character->GetFollowCamera()->SetFieldOfView(CurrentFOV);
 	}
 }
 
+// 开始开火计时器
 void UCombatComponent::StartFireTimer()
 {
-	if (EquippedWeapon == nullptr || Character == nullptr) return;
+	if (EquippedWeapon == nullptr || Character == nullptr)
+		return;
 	Character->GetWorldTimerManager().SetTimer(
 		FireTimer,
 		this,
 		&UCombatComponent::FireTimerFinished,
-		EquippedWeapon->FireDelay
-	);
+		EquippedWeapon->FireDelay);
 }
 
+// 开火计时器结束时
 void UCombatComponent::FireTimerFinished()
 {
-	if (EquippedWeapon == nullptr) return;
+	if (EquippedWeapon == nullptr)
+		return;
 	bCanFire = true;
 	if (bFireButtonPressed && EquippedWeapon->bAutomatic)
 	{
-		Fire();
+		Fire(); // 如果开火按钮仍然按下且武器是自动的，则继续开火
 	}
 }
 
@@ -293,7 +302,7 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult &TraceHitResult)
 		if (Character)
 		{
 			float DistanceToCharacter = (Character->GetActorLocation() - Start).Size();
-			Start += CrosshairWorldDirection * (DistanceToCharacter+ 100.f);
+			Start += CrosshairWorldDirection * (DistanceToCharacter + 100.f);
 		}
 
 		FVector End = Start + CrosshairWorldDirection * TRACE_LENGTH;
@@ -301,8 +310,7 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult &TraceHitResult)
 			TraceHitResult,
 			Start,
 			End,
-			ECollisionChannel::ECC_Visibility
-		);
+			ECollisionChannel::ECC_Visibility);
 		if (TraceHitResult.GetActor() &&
 			TraceHitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>())
 		{

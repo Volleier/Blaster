@@ -7,7 +7,7 @@
 #include "CharacterOverlay.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class BLASTER_API UCharacterOverlay : public UUserWidget
@@ -15,8 +15,8 @@ class BLASTER_API UCharacterOverlay : public UUserWidget
 	GENERATED_BODY()
 public:
 	UPROPERTY(meta = (BindWidget))
-	class UProgressBar* HealthBar;
+	class UProgressBar *HealthBar;
 
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* HealthText;
+	class UTextBlock *HealthText;
 };

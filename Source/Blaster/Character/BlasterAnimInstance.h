@@ -21,7 +21,7 @@ public:
 	virtual void NativeUpdateAnimation(float DeltaTime) override;
 
 	// 装备的武器
-	class AWeapon* EquippedWeapon;
+	class AWeapon *EquippedWeapon;
 
 private:
 	// Blaster角色
@@ -83,12 +83,15 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	ETurningInPlace TurningInPlace;
 
+	// 右手旋转
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	FRotator RightHandRotation;
 
+	// 是否本地控制
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	bool bLocallyControlled;
 
+	// 是否旋转根骨骼
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	bool bRotateRootBone;
 };

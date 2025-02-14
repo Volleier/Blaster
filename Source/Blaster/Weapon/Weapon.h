@@ -32,25 +32,25 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const override;
 	// 显示或隐藏拾取小部件
 	void ShowPickupWidget(bool bShowWidget);
-	virtual void Fire(const FVector& HitTarget);
+	virtual void Fire(const FVector &HitTarget);
 
 	/*
-	* 武器材质准心
-	*/
+	 * 武器材质准心
+	 */
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
-	class UTexture2D* CrosshairsCenter;
+	class UTexture2D *CrosshairsCenter;
 
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
-	UTexture2D* CrosshairsLeft;
+	UTexture2D *CrosshairsLeft;
 
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
-	UTexture2D* CrosshairsRight;
+	UTexture2D *CrosshairsRight;
 
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
-	UTexture2D* CrosshairsTop;
+	UTexture2D *CrosshairsTop;
 
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
-	UTexture2D* CrosshairsBottom;
+	UTexture2D *CrosshairsBottom;
 
 	/*
 	 * 瞄准放大FOV
@@ -112,11 +112,11 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "武器属性")
 	class UWidgetComponent *PickupWidget;
 
-	UPROPERTY(EditAnywhere,Category = "武器属性")
-	class UAnimationAsset* FireAnimation;
+	UPROPERTY(EditAnywhere, Category = "武器属性")
+	class UAnimationAsset *FireAnimation;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<class ACasing>CasingClass;
+	TSubclassOf<class ACasing> CasingClass;
 
 public:
 	// 设置武器状态
