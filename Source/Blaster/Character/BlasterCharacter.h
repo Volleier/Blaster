@@ -143,6 +143,8 @@ private:
 	UFUNCTION()
 	void OnRep_Health();
 
+	// 角色控制器
+	class ABlasterPlayerController* BlasterPlayerController;
 public:
 	// 设置重叠的武器
 	void SetOverlappingWeapon(AWeapon *Weapon);
