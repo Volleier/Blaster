@@ -57,13 +57,6 @@ void AProjectile::BeginPlay()
 // 子弹碰撞后销毁
 void AProjectile::OnHit(UPrimitiveComponent *HitComponent, AActor *OtherActor, UPrimitiveComponent *OtherComponent, FVector NormalImpulse, const FHitResult &Hit)
 {
-	// 如果碰撞到BlasterCharacter，调用其MulticastHit函数
-	ABlasterCharacter *BlasterCharacter = Cast<ABlasterCharacter>(OtherActor);
-	if (BlasterCharacter)
-	{
-		BlasterCharacter->MulticastHit();
-	}
-
 	// 销毁子弹
 	Destroy();
 }

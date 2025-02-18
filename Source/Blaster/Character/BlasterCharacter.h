@@ -60,6 +60,11 @@ protected:
 	// 代理转向
 	void SimProxiesTurn();
 
+	// 角色接受伤害
+	UFUNCTION()
+	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
+	void UpdateHUDHealth();
+
 private:
 	// 摄像机臂组件
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -145,6 +150,7 @@ private:
 
 	// 角色控制器
 	class ABlasterPlayerController* BlasterPlayerController;
+
 public:
 	// 设置重叠的武器
 	void SetOverlappingWeapon(AWeapon *Weapon);

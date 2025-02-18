@@ -35,6 +35,10 @@ protected:
 		const FHitResult &Hit				 // 碰撞结果
 	);
 
+	// 子弹伤害
+	UPROPERTY(EditAnywhere)
+	float Damage = 20.f;
+
 private:
 	// 碰撞盒组件
 	UPROPERTY(EditAnywhere)

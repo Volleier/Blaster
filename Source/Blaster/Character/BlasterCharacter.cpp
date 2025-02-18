@@ -71,6 +71,12 @@ void ABlasterCharacter::OnRep_ReplicatedMovement()
 void ABlasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UpdateHUDHealth();
+	if (HasAuthority())
+	{
+		OnTakeAnyDamage.AddDynamic(this, &ABlasterCharacter::ReceiveDamage);
+	}
 }
 
 void ABlasterCharacter::Tick(float DeltaTime)
@@ -332,6 +338,27 @@ void ABlasterCharacter::SimProxiesTurn()
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 }
 
+void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
+{
+	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
+	UpdateHUDHealth();
+	PlayHitReactMontage();
+}
+
+// 更新HUD上的健康值
+void ABlasterCharacter::UpdateHUDHealth()
+{
+	// 如果BlasterPlayerController为空，则尝试获取Controller并进行类型转换
+	BlasterPlayerController = BlasterPlayerController == nullptr
+		                          ? Cast<ABlasterPlayerController>(Controller)
+		                          : BlasterPlayerController;
+	// 如果BlasterPlayerController不为空，则更新HUD上的健康值
+	if (BlasterPlayerController)
+	{
+		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
+	}
+}
+
 // 跳跃
 void ABlasterCharacter::Jump()
 {
@@ -418,6 +445,8 @@ void ABlasterCharacter::HideCameraIfCharacterClose()
 // 处理健康值变化的逻辑
 void ABlasterCharacter::OnRep_Health()
 {
+	UpdateHUDHealth();
+	PlayHitReactMontage();
 }
 
 // 设置重叠的武器
