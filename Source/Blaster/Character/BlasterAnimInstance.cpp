@@ -47,7 +47,8 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	TurningInPlace = BlasterCharacter->GetTurningInPlace();
 	// 获取骨骼的旋转角度
 	bRotateRootBone = BlasterCharacter->ShouldRotateRootBone();
-
+	// 获取角色是否被淘汰
+	bElimmed = BlasterCharacter->IsElimmed();
 	// 计算偏移偏航角用于侧移
 	FRotator AimRotation = BlasterCharacter->GetBaseAimRotation();								   // 获取角色的基础瞄准旋转
 	FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(BlasterCharacter->GetVelocity()); // 根据速度向量计算旋转

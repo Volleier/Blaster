@@ -94,4 +94,8 @@ private:
 	// 是否旋转根骨骼
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	bool bRotateRootBone;
+
+	// 是否消除
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	bool bElimmed;
 };

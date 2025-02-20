@@ -20,6 +20,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 	void PlayFireMonatge(bool bAiming);
+	void PlayElimMontage();
 
 	// 多播函数，用于处理命中效果
 	UFUNCTION(NetMulticast, Unreliable)
@@ -27,6 +28,7 @@ public:
 
 	virtual void OnRep_ReplicatedMovement() override;
 
+	UFUNCTION(NetMulticast,Reliable)
 	void Elim();
 
 protected:
@@ -118,6 +120,10 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	UAnimMontage *HitReactMontage;
 
+	// 消除动画蒙太奇
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* ElimMontage;
+
 	// 如果角色靠近则隐藏摄像机
 	void HideCameraIfCharacterClose();
 	// 摄像机阈值
@@ -153,6 +159,8 @@ private:
 	// 角色控制器
 	class ABlasterPlayerController* BlasterPlayerController;
 
+	bool bElimmed = false;
+
 public:
 	// 设置重叠的武器
 	void SetOverlappingWeapon(AWeapon *Weapon);
@@ -175,4 +183,6 @@ public:
 	FORCEINLINE UCameraComponent *GetFollowCamera() const { return FollowCamera; }
 	// 是否应该旋转根骨骼
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
+	// 是否被消除
+	FORCEINLINE bool IsElimmed() const { return bElimmed; }
 };
