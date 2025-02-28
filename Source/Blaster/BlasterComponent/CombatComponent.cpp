@@ -243,6 +243,13 @@ void UCombatComponent::OnRep_EquippedWeapon()
 {
 	if (EquippedWeapon && Character)
 	{
+		// 
+		EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
+		const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
+		if (HandSocket)
+		{
+			HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
+		}
 		// 装备武器后更新角色的移动和旋转设置
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;

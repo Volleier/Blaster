@@ -88,9 +88,23 @@ void AWeapon::SetWeaponState(EWeaponState State)
 	WeaponState = State; // 设置武器状态
 	switch (WeaponState)
 	{
+		// 如果武器状态为已装备
 	case EWeaponState::EWS_Equipped:
-		ShowPickupWidget(false);										 // 隐藏拾取小部件
+		ShowPickupWidget(false); // 隐藏拾取小部件
 		AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision); // 禁用碰撞
+		WeaponMesh->SetSimulatePhysics(false);
+		WeaponMesh->SetEnableGravity(false);
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		break;
+		// 如果武器状态为已丢弃
+	case EWeaponState::EWS_Dropped:
+		if (HasAuthority())
+		{
+			AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		}
+		WeaponMesh->SetSimulatePhysics(true);
+		WeaponMesh->SetEnableGravity(true);
+		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		break;
 	}
 }
@@ -140,4 +154,12 @@ void AWeapon::Fire(const FVector &HitTargets)
 			}
 		}
 	}
+}
+
+void AWeapon::Dropped()
+{
+	SetWeaponState(EWeaponState::EWS_Dropped);
+	FDetachmentTransformRules DetachRules(EDetachmentRule::KeepWorld, true);
+	WeaponMesh->DetachFromComponent(DetachRules);
+	SetOwner(nullptr);
 }
