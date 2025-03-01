@@ -74,6 +74,8 @@ protected:
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
 	                   class AController* InstigatorController, AActor* DamageCauser);
 	void UpdateHUDHealth();
+	// 轮询任何相关类并初始化我们的HUD
+	void PollInit();
 
 private:
 	// 摄像机臂组件
@@ -208,6 +210,7 @@ private:
 	UPROPERTY(EditAnywhere)
 	class USoundCue* ElimBotSound;
 
+	class ABlasterPlayerState* BlasterPlayerState;
 public:
 	// 设置重叠的武器
 	void SetOverlappingWeapon(AWeapon* Weapon);
@@ -232,4 +235,7 @@ public:
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
 	// 是否被消除
 	FORCEINLINE bool IsElimmed() const { return bElimmed; }
+
+	FORCEINLINE float GetHealth() const { return Health; }
+	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 };
