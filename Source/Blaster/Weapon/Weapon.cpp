@@ -9,6 +9,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Casing.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "Blaster/PlayerController/BlasterPlayerController.h"
 
 // 设置默认值
 AWeapon::AWeapon()
@@ -60,6 +61,21 @@ void AWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AWeapon, WeaponState);
+	DOREPLIFETIME(AWeapon, Ammo);
+}
+
+void AWeapon::OnRep_Owner()
+{
+	Super::OnRep_Owner();
+	if (Owner == nullptr)
+	{
+		BlasterOwnerCharacter = nullptr;
+		BlasterOwnerController = nullptr;
+	}
+	else
+	{
+		SetHUDAmmo();
+	}
 }
 
 // 设置武器状态
@@ -80,6 +96,31 @@ void AWeapon::OnSphereEndOverlap(UPrimitiveComponent *OverlappedComponent, AActo
 	{
 		BlasterCharacter->SetOverlappingWeapon(nullptr); // 清除重叠的武器
 	}
+}
+
+void AWeapon::SetHUDAmmo()
+{
+	BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(GetOwner()) : BlasterOwnerCharacter;
+	if (BlasterOwnerCharacter)
+	{
+		BlasterOwnerController = BlasterOwnerController == nullptr ? Cast<ABlasterPlayerController>(BlasterOwnerCharacter->Controller) : BlasterOwnerController;
+		if (BlasterOwnerController)
+		{
+			BlasterOwnerController->SetHUDWeaponAmmo(Ammo);
+		}
+	}
+}
+
+void AWeapon::OnRep_Ammo()
+{
+	BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(GetOwner()) : BlasterOwnerCharacter;
+	SetHUDAmmo();
+}
+
+void AWeapon::SpendRound()
+{
+	--Ammo;
+	SetHUDAmmo();
 }
 
 // 设置武器状态

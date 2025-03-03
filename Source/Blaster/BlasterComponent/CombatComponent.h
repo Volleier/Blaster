@@ -58,8 +58,11 @@ protected:
 
 private:
 	// 角色指针
+	UPROPERTY()
 	class ABlasterCharacter *Character;
+	UPROPERTY()
 	class ABlasterPlayerController *Controller;
+	UPROPERTY()
 	class ABlasterHUD *HUD;
 
 	// 装备的武器，使用OnRep_EquippedWeapon进行同步

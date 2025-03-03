@@ -353,19 +353,24 @@ void UCombatComponent::EquipWeapon(AWeapon *WeaponToEquip)
 {
 	if (Character == nullptr || WeaponToEquip == nullptr)
 		return;
-
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->Dropped();
+	}
 	EquippedWeapon = WeaponToEquip;
 	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
 
-	// 将武器附加到角色的右手插槽
+	// 将武器附加到角色的右手插槽 
 	const USkeletalMeshSocket *HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
 	if (HandSocket)
 	{
 		HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
 	}
-
+	 
 	// 设置武器和角色的相关属性
 	EquippedWeapon->SetOwner(Character);
+	EquippedWeapon->SetHUDAmmo();
 	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 	Character->bUseControllerRotationYaw = true;
+
 }

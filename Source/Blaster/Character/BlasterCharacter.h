@@ -165,6 +165,7 @@ private:
 	void OnRep_Health();
 
 	// 角色控制器
+	UPROPERTY()
 	class ABlasterPlayerController* BlasterPlayerController;
 
 	bool bElimmed = false;
@@ -210,6 +211,7 @@ private:
 	UPROPERTY(EditAnywhere)
 	class USoundCue* ElimBotSound;
 
+	UPROPERTY()
 	class ABlasterPlayerState* BlasterPlayerState;
 public:
 	// 设置重叠的武器

@@ -53,6 +53,7 @@ private:
 	class UParticleSystem *Tracer;
 
 	// 轨迹粒子系统组件
+	UPROPERTY()
 	class UParticleSystemComponent *TracerComponent;
 
 	// 碰撞时的粒子系统
