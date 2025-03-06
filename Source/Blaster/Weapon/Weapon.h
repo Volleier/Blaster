@@ -149,4 +149,6 @@ public:
 	FORCEINLINE float GetZoomedFOV() const { return ZoomedFOV; }
 	// 获取缩放插值速度
 	FORCEINLINE float GetZoomInterSpeed() const { return ZoomInterSpeed; }
+
+	bool IsEmpty();
 };

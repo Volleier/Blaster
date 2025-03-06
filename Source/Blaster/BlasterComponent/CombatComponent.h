@@ -128,4 +128,6 @@ private:
 	void StartFireTimer();
 	// 开火计时器结束
 	void FireTimerFinished();
+
+	bool CanFire();
 };
