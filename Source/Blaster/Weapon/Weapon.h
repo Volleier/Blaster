@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "WeaponTypes.h"
 #include "Weapon.generated.h"
 
 // 枚举类，表示武器的状态
@@ -138,6 +139,8 @@ private:
 	UPROPERTY()
 	class ABlasterPlayerController* BlasterOwnerController;
 
+	UPROPERTY(EditAnywhere)
+	EWeaponType WeaponTypr;
 public:
 	// 设置武器状态
 	void SetWeaponState(EWeaponState State);
@@ -151,4 +154,5 @@ public:
 	FORCEINLINE float GetZoomInterSpeed() const { return ZoomInterSpeed; }
 
 	bool IsEmpty();
+	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponTypr; }
 };

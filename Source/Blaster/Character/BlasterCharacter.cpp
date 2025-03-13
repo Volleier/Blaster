@@ -212,7 +212,7 @@ void ABlasterCharacter::PostInitializeComponents()
 }
 
 // 播放开火动画
-void ABlasterCharacter::PlayFireMonatge(bool bAiming)
+void ABlasterCharacter::PlayFireMontage(bool bAiming)
 {
 	if (Combat == nullptr || Combat->EquippedWeapon == nullptr)
 		return;

@@ -20,7 +20,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
-	void PlayFireMonatge(bool bAiming);
+	void PlayFireMontage(bool bAiming);
 	void PlayElimMontage();
 
 	// 多播函数，用于处理命中效果

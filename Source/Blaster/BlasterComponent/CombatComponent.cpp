@@ -19,16 +19,16 @@ UCombatComponent::UCombatComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	BaseWalkSpeed = 600.f; // 设置角色的基础行走速度
-	AimWalkSpeed = 450.f;  // 设置角色瞄准时的行走速度
+	AimWalkSpeed = 450.f; // 设置角色瞄准时的行走速度
 }
 
 // 设置需要在网络中复制的属性
-void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
+void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UCombatComponent, EquippedWeapon); // 复制装备的武器到所有客户端
-	DOREPLIFETIME(UCombatComponent, bAiming);		 // 复制瞄准状态到所有客户端
+	DOREPLIFETIME(UCombatComponent, bAiming); // 复制瞄准状态到所有客户端
 	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly); // 只在所有者客户端上复制携带的弹药
 }
 
@@ -48,20 +48,26 @@ void UCombatComponent::BeginPlay()
 			CurrentFOV = DefaultFOV;
 		}
 	}
+
+	if ((Character->HasAuthority()))
+	{
+		InitializeCarriedAmmo();
+	}
 }
 
 // 每帧更新组件
-void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
+void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType,
+                                     FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	if (Character && Character->IsLocallyControlled())
 	{
 		FHitResult HitResult;
-		TraceUnderCrosshairs(HitResult);   // 在准星位置进行射线检测
+		TraceUnderCrosshairs(HitResult); // 在准星位置进行射线检测
 		HitTarget = HitResult.ImpactPoint; // 获取射线检测的命中点
-		SetHUDCrosshairs(DeltaTime);	   // 设置HUD准星
-		InterFOV(DeltaTime);			   // 插值计算视野
+		SetHUDCrosshairs(DeltaTime); // 设置HUD准星
+		InterFOV(DeltaTime); // 插值计算视野
 	}
 }
 
@@ -69,7 +75,9 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 {
 	if (Character == nullptr || Character->Controller == nullptr)
+	{
 		return;
+	}
 	Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
 	if (Controller)
 	{
@@ -165,7 +173,9 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 void UCombatComponent::InterFOV(float DeltaTime)
 {
 	if (EquippedWeapon == nullptr)
+	{
 		return;
+	}
 
 	if (bAiming)
 	{
@@ -196,7 +206,9 @@ void UCombatComponent::InterFOV(float DeltaTime)
 void UCombatComponent::StartFireTimer()
 {
 	if (EquippedWeapon == nullptr || Character == nullptr)
+	{
 		return;
+	}
 	Character->GetWorldTimerManager().SetTimer(
 		FireTimer,
 		this,
@@ -208,7 +220,9 @@ void UCombatComponent::StartFireTimer()
 void UCombatComponent::FireTimerFinished()
 {
 	if (EquippedWeapon == nullptr)
+	{
 		return;
+	}
 	bCanFire = true;
 	if (bFireButtonPressed && EquippedWeapon->bAutomatic)
 	{
@@ -218,12 +232,25 @@ void UCombatComponent::FireTimerFinished()
 
 bool UCombatComponent::CanFire()
 {
-	if (EquippedWeapon == nullptr) return false;
+	if (EquippedWeapon == nullptr)
+	{
+		return false;
+	}
 	return !EquippedWeapon->IsEmpty() || !bCanFire;
 }
 
 void UCombatComponent::OnRep_CarriedAmmo()
 {
+	Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+	if (Controller)
+	{
+		Controller->SetHUDWeaponAmmo(CarriedAmmo);
+	}
+}
+
+void UCombatComponent::InitializeCarriedAmmo()
+{
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_AssaultRifle, StartingAmmo);
 }
 
 // 设置瞄准状态
@@ -292,7 +319,7 @@ void UCombatComponent::Fire()
 }
 
 // 在准星位置进行射线检测
-void UCombatComponent::TraceUnderCrosshairs(FHitResult &TraceHitResult)
+void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 {
 	// 获取视口大小
 	FVector2D ViewportSize;
@@ -328,7 +355,7 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult &TraceHitResult)
 			TraceHitResult,
 			Start,
 			End,
-			ECollisionChannel::ECC_Visibility);
+			ECC_Visibility);
 		if (TraceHitResult.GetActor() &&
 			TraceHitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>())
 		{
@@ -342,28 +369,32 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult &TraceHitResult)
 }
 
 // 服务器端处理开火的实现
-void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize &TraceHitTarget)
+void UCombatComponent::ServerFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
 	MulticastFire(TraceHitTarget); // 广播开火事件到所有客户端
 }
 
 // 多播开火事件的实现（在所有客户端执行）
-void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize &TraceHitTarget)
+void UCombatComponent::MulticastFire_Implementation(const FVector_NetQuantize& TraceHitTarget)
 {
 	if (EquippedWeapon == nullptr)
+	{
 		return;
+	}
 	if (Character)
 	{
-		Character->PlayFireMonatge(bAiming);  // 播放开火动画
+		Character->PlayFireMontage(bAiming); // 播放开火动画
 		EquippedWeapon->Fire(TraceHitTarget); // 执行武器的开火逻辑
 	}
 }
 
 // 装备武器
-void UCombatComponent::EquipWeapon(AWeapon *WeaponToEquip)
+void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 {
 	if (Character == nullptr || WeaponToEquip == nullptr)
+	{
 		return;
+	}
 	if (EquippedWeapon)
 	{
 		EquippedWeapon->Dropped();
@@ -372,16 +403,25 @@ void UCombatComponent::EquipWeapon(AWeapon *WeaponToEquip)
 	EquippedWeapon->SetWeaponState(EWeaponState::EWS_Equipped);
 
 	// 将武器附加到角色的右手插槽 
-	const USkeletalMeshSocket *HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
+	const USkeletalMeshSocket* HandSocket = Character->GetMesh()->GetSocketByName(FName("RightHandSocket"));
 	if (HandSocket)
 	{
 		HandSocket->AttachActor(EquippedWeapon, Character->GetMesh());
 	}
-	 
+
 	// 设置武器和角色的相关属性
 	EquippedWeapon->SetOwner(Character);
 	EquippedWeapon->SetHUDAmmo();
+	if (CarriedAmmoMap.Contains(EquippedWeapon->GetWeaponType()))
+	{
+		CarriedAmmo = CarriedAmmoMap[EquippedWeapon->GetWeaponType()];
+	}
+
+	Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+	if (Controller)
+	{
+		Controller->SetHUDWeaponAmmo(CarriedAmmo);
+	}
 	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 	Character->bUseControllerRotationYaw = true;
-
 }
