@@ -47,11 +47,10 @@ void UCombatComponent::BeginPlay()
 			DefaultFOV = Character->GetFollowCamera()->FieldOfView;
 			CurrentFOV = DefaultFOV;
 		}
-	}
-
-	if ((Character->HasAuthority()))
-	{
-		InitializeCarriedAmmo();
+		if (Character->HasAuthority())
+		{
+			InitializeCarriedAmmo();
+		}
 	}
 }
 
@@ -166,6 +165,21 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 			// 更新HUD的准星包
 			HUD->SetHUDPackage(HUDPackage);
 		}
+	}
+}
+
+void UCombatComponent::ServerReload_Implementation()
+{
+	if (Character == nullptr) return;
+
+	Character->PlayReloadMontage();
+}
+
+void UCombatComponent::Reload()
+{
+	if (CarriedAmmo > 0)
+	{
+		ServerReload();
 	}
 }
 

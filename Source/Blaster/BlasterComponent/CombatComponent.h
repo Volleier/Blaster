@@ -24,7 +24,8 @@ public:
 
 	// 装备武器
 	void EquipWeapon(class AWeapon *WeaponToEquip);
-
+	void Reload();
+		
 protected:
 	virtual void BeginPlay() override;
 	// 设置瞄准状态
@@ -57,6 +58,9 @@ protected:
 
 	// 设置HUD准星
 	void SetHUDCrosshairs(float DeltaTime);
+
+	UFUNCTION(Server, Reliable)
+	void ServerReload();
 
 private:
 	// 角色指针

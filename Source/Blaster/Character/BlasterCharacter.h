@@ -21,6 +21,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PostInitializeComponents() override;
 	void PlayFireMontage(bool bAiming);
+	void PlayReloadMontage();	
 	void PlayElimMontage();
 
 	// 多播函数，用于处理命中效果
@@ -62,6 +63,8 @@ protected:
 	void FireButtonPressed();
 	// 开火按钮释放
 	void FireButtonReleased();
+	// 换弹按钮按下
+	void ReloadButtonPressed();
 	// 播放命中反应动画
 	void PlayHitReactMontage();
 	// 计算瞄准偏移角度
@@ -123,6 +126,10 @@ private:
 	// 开火武器动画蒙太奇
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	class UAnimMontage* FireWeaponMontage;
+
+	// 换弹动画蒙太奇
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* ReloadMontage;
 
 	// 命中反应动画蒙太奇
 	UPROPERTY(EditAnywhere, Category = "Combat")
