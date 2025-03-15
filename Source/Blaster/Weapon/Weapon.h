@@ -39,6 +39,8 @@ public:
 
 	void Dropped();
 
+	void AddAmmo(int32 AmmoToAdd);
+
 	/*
 	 * 武器材质准心
 	 */
@@ -155,4 +157,6 @@ public:
 
 	bool IsEmpty();
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponTypr; }
+	FORCEINLINE int32 GetAmmo() const { return Ammo; }
+	FORCEINLINE int32 GetMagCapacity() const { return MagCapacity; }
 };
