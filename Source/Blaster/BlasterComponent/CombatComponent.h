@@ -6,6 +6,7 @@
 #include "Blaster/HUD/BlasterHUD.h"
 #include "Components/ActorComponent.h"
 #include "Blaster/Weapon/WeaponTypes.h"
+#include "Blaster/BlasterTypes/CombatState.h"
 #include "CombatComponent.generated.h"
 
 
@@ -25,7 +26,11 @@ public:
 	// 装备武器
 	void EquipWeapon(class AWeapon *WeaponToEquip);
 	void Reload();
-		
+
+	// 结束装填
+	UFUNCTION(BlueprintCallable)
+	void FinishReloading();
+
 protected:
 	virtual void BeginPlay() override;
 	// 设置瞄准状态
@@ -61,6 +66,8 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void ServerReload();
+
+	void HandleReload();
 
 private:
 	// 角色指针
@@ -149,4 +156,10 @@ private:
 	int StartingAmmo = 30;
 
 	void InitializeCarriedAmmo();
+
+	UPROPERTY(ReplicatedUsing = OnRep_CombatState)
+	ECombatState CombatState = ECombatState::ECS_Unoccupied;
+
+	UFUNCTION()
+	void OnRep_CombatState();
 };

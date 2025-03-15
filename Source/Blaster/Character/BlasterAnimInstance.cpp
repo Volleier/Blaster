@@ -105,4 +105,5 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 				30.f); // 插值计算新的右手旋转
 		}
 	}
+	bUseFABRIK = BlasterCharacter->GetCombatState() != ECombatState::ECS_Reloading;
 }
