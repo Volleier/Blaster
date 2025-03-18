@@ -76,6 +76,10 @@ public:
 	UPROPERTY(EditAnywhere, Category = Combat)
 	bool bAutomatic = true;
 
+	// 装备声音
+	UPROPERTY(EditAnywhere)
+	class USoundCue* EquipSound;
+
 protected:
 	// 游戏开始时调用的函数
 	virtual void BeginPlay() override;
