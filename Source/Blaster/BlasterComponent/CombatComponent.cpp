@@ -311,6 +311,11 @@ void UCombatComponent::FireTimerFinished()
 	{
 		Fire(); // 如果开火按钮仍然按下且武器是自动的，则继续开火
 	}
+	// 弹夹为空时自动换弹
+	if (EquippedWeapon->IsEmpty())
+	{
+		Reload();
+	}
 }
 
 bool UCombatComponent::CanFire()
@@ -512,6 +517,10 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 			EquippedWeapon->EquipSound,
 			Character->GetActorLocation()
 		);
+	}
+	if (EquippedWeapon->IsEmpty())
+	{
+		Reload();
 	}
 	Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 	Character->bUseControllerRotationYaw = true;
