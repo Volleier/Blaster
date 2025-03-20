@@ -18,11 +18,32 @@ public:
 	void SetHUDMatchCountdown(float CountdownTime);
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void Tick(float DeltaTime) override;
-		
+
+	virtual float GetServerTime(); // 使用服务器时间同步
+	virtual void ReceivedPlayer() override; // 即刻同步时间
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
 
+	/**
+	* 在客户端和服务器之间同步时间
+	*/
+
+	// 查询当前服务器时间, 传送当前客户端时间
+	UFUNCTION(Server, Reliable)
+	void ServerRequestServerTime(float TimeOfClientRequest);
+
+	// 使用ServerRequestServerTime传送服务器时间到客户端
+	UFUNCTION(Client, Reliable)
+	void ClientReportServerTime(float TimeOfClientRequest, float TimeServerReceivedClientRequest);
+
+	float ClientServerDelta = 0.f; // 客户端与服务器时间差
+
+	UPROPERTY(EditAnywhere, Category = Time)
+	float TimeSyncFrequency = 5.f;
+
+	float TimeSyncRunningTime = 0.f;
+	void CheckTimeSync(float DeltaTime);
 private:
 	UPROPERTY()
 	class ABlasterHUD* BlasterHUD;
