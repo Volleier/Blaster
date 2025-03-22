@@ -46,6 +46,14 @@ public:
 	// 添加角色覆盖
 	void AddCharacterOverlay();
 
+	UPROPERTY(EditAnywhere, Category = "Announcements")
+	TSubclassOf<UUserWidget> AnnouncementClass;
+
+	UPROPERTY()
+	class UAnnouncement* Announcement;
+
+	void AddAnnouncement();
+
 protected:
 	// 重写BeginPlay函数，在游戏开始时调用
 	virtual void BeginPlay() override;
