@@ -39,7 +39,9 @@ public:
 	// 编辑属性，玩家状态的类别，用于指定角色覆盖类
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	TSubclassOf<class UUserWidget> CharacterOverlayClass;
-	class UCharacterOverlay *CharacterOverlay; // 角色覆盖指针
+	// 角色覆盖指针
+	UPROPERTY()
+	class UCharacterOverlay *CharacterOverlay; 
 
 protected:
 	// 重写BeginPlay函数，在游戏开始时调用
