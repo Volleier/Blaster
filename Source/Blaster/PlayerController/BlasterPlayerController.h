@@ -21,10 +21,14 @@ public:
 
 	virtual float GetServerTime(); // 使用服务器时间同步
 	virtual void ReceivedPlayer() override; // 即刻同步时间
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	void OnMatchStateSet(FName State);
+
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
-
+	void PollInit();
 	/**
 	* 在客户端和服务器之间同步时间
 	*/
@@ -50,4 +54,20 @@ private:
 
 	float MatchTime = 120.f;
 	uint32 CountdownInt = 0;
+
+
+	UPROPERTY(ReplicatedUsing = OnRep_MatchState)
+	FName MatchState;
+
+	UFUNCTION()
+	void OnRep_MatchState();
+
+	UPROPERTY()
+	class UCharacterOverlay* CharacterOverlay;
+	bool bInitializeCharacterOverlay = false;
+
+	float HUDHealth;
+	float HUDMaxHealth;
+	float HUDScore;
+	int32 HUDDefeats;
 };

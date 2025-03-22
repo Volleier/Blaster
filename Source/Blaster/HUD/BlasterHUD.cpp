@@ -8,9 +8,6 @@
 void ABlasterHUD::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// 添加角色覆盖层
-	AddCharacterOverlay();
 }
 
 // 添加角色覆盖层

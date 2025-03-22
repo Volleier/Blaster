@@ -43,11 +43,12 @@ public:
 	UPROPERTY()
 	class UCharacterOverlay *CharacterOverlay; 
 
+	// 添加角色覆盖
+	void AddCharacterOverlay();
+
 protected:
 	// 重写BeginPlay函数，在游戏开始时调用
 	virtual void BeginPlay() override;
-	// 添加角色覆盖
-	void AddCharacterOverlay();
 
 private:
 	FHUDPackage HUDPackage; // HUD包实例
