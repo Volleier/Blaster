@@ -3,6 +3,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
 #include "BlasterGameMode.generated.h"
+
+namespace MatchState
+{
+	// 已达到比赛持续时间。显示获胜者并开始冷却计时器。
+	extern BLASTER_API const FName Cooldown; 
+}
+
 /**
  *
  */
