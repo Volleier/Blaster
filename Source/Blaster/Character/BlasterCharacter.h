@@ -38,6 +38,9 @@ public:
 
 	virtual void Destroyed() override;
 
+	UPROPERTY(Replicated)
+	bool bDisableGameplay = false;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -80,6 +83,8 @@ protected:
 	void UpdateHUDHealth();
 	// 轮询任何相关类并初始化我们的HUD
 	void PollInit();
+
+	void RotateInPlace(float DeltaTime);
 
 private:
 	// 摄像机臂组件
@@ -248,6 +253,9 @@ public:
 
 	FORCEINLINE float GetHealth() const { return Health; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
+
+	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; }
+	FORCEINLINE bool GetDisableGameplay() const { return bDisableGameplay; }
 
 	ECombatState GetCombatState() const;
 };

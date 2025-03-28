@@ -31,6 +31,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void FinishReloading();
 
+	// 处理开火按钮按下事件
+	void FireButtonPressed(bool bIsPressed);
+
 protected:
 	virtual void BeginPlay() override;
 	// 设置瞄准状态
@@ -43,9 +46,6 @@ protected:
 	// 当装备的武器发生变化时调用
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
-
-	// 处理开火按钮按下事件
-	void FireButtonPressed(bool bIsPressed);
 
 	// 执行开火操作
 	void Fire();
