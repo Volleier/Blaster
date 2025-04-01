@@ -124,6 +124,7 @@ void ABlasterCharacter::MulticastElim_Implementation()
 
 	// 禁用角色移动
 	bDisableGameplay = true;
+	GetCharacterMovement()->DisableMovement();
 	if (Combat)
 	{
 		Combat->FireButtonPressed(false);
