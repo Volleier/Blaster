@@ -2,18 +2,24 @@
 
 #include "ProjectileRocket.h"
 #include "Kismet/GameplayStatics.h"
-//#include "NiagaraFunctionLibrary.h"
-//#include "NiagaraComponent.h"
+#include "NiagaraComponent.h"
+#include "NiagaraSystemInstance.h"
 #include "Sound/SoundCue.h"
 #include "Components/BoxComponent.h"
 #include "Sound/SoundCue.h"
 #include "Components/AudioComponent.h"
+#include "RocketMovementComponent.h"
+#include "NiagaraFunctionLibrary.h"
 
 AProjectileRocket::AProjectileRocket()
 {
 	RocketMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Rocket Mesh"));
 	RocketMesh->SetupAttachment(RootComponent);
 	RocketMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	RocketMovementComponent = CreateDefaultSubobject<URocketMovementComponent>(TEXT("RocketMovementComponent"));
+	RocketMovementComponent->bRotationFollowsVelocity = true;
+	RocketMovementComponent->SetIsReplicated(true);
 }
 
 void AProjectileRocket::BeginPlay()
@@ -27,7 +33,7 @@ void AProjectileRocket::BeginPlay()
 
 	if (TrailSystem)
 	{
-		/*
+		
 		TrailSystemComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
 			TrailSystem,
 			GetRootComponent(),
@@ -36,7 +42,7 @@ void AProjectileRocket::BeginPlay()
 			GetActorRotation(),
 			EAttachLocation::KeepWorldPosition,
 			false
-		);*/
+		);
 	}
 	if (ProjectileLoop && LoopingSoundAttenuation)
 	{
@@ -87,14 +93,18 @@ void AProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 	if (CollisionBox)
 	{
 		CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}/*
+	}
 	if (TrailSystemComponent)
 	{
 		TrailSystemComponent->GetSystemInstance()->Deactivate();
-	}*/
+	}
 	if (ProjectileLoopComponent && ProjectileLoopComponent->IsPlaying())
 	{
 		ProjectileLoopComponent->Stop();
+	}
+	if (OtherActor == GetOwner())
+	{
+		return;
 	}
 
 	APawn* FiringPawn = GetInstigator();

@@ -16,6 +16,7 @@ AWeapon::AWeapon()
 {
 	PrimaryActorTick.bCanEverTick = false; // 禁用每帧调用Tick函数
 	bReplicates = true;					   // 启用网络复制
+	SetReplicateMovement(true);
 
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh")); // 创建武器网格组件
 	SetRootComponent(WeaponMesh);													 // 设置根组件为武器网格

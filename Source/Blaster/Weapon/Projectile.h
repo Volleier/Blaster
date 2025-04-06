@@ -49,11 +49,11 @@ protected:
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent *CollisionBox;
 
-private:
 	// 投射物运动组件
 	UPROPERTY(VisibleAnywhere)
 	class UProjectileMovementComponent *ProjectileMovementComponent;
 
+private:
 	// 轨迹粒子系统
 	UPROPERTY(EditAnywhere)
 	UParticleSystem* Tracer;;
