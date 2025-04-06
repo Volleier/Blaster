@@ -39,28 +39,26 @@ protected:
 	UPROPERTY(EditAnywhere)
 	float Damage = 20.f;
 
-private:
+	UPROPERTY(EditAnywhere)
+	class UParticleSystem* ImpactParticles;
+
+	UPROPERTY(EditAnywhere)
+	class USoundCue* ImpactSound;
+
 	// 碰撞盒组件
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent *CollisionBox;
 
+private:
 	// 投射物运动组件
 	UPROPERTY(VisibleAnywhere)
 	class UProjectileMovementComponent *ProjectileMovementComponent;
 
 	// 轨迹粒子系统
 	UPROPERTY(EditAnywhere)
-	class UParticleSystem *Tracer;
+	UParticleSystem* Tracer;;
 
 	// 轨迹粒子系统组件
 	UPROPERTY()
 	class UParticleSystemComponent *TracerComponent;
-
-	// 碰撞时的粒子系统
-	UPROPERTY(EditAnywhere)
-	UParticleSystem *ImpactParticles;
-
-	// 碰撞时的声音
-	UPROPERTY(EditAnywhere)
-	class USoundCue *ImpactSound;
 };
