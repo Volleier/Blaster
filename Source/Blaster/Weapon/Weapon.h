@@ -146,7 +146,7 @@ private:
 	class ABlasterPlayerController* BlasterOwnerController;
 
 	UPROPERTY(EditAnywhere)
-	EWeaponType WeaponTypr;
+	EWeaponType WeaponType;
 public:
 	// 设置武器状态
 	void SetWeaponState(EWeaponState State);
@@ -160,7 +160,7 @@ public:
 	FORCEINLINE float GetZoomInterSpeed() const { return ZoomInterSpeed; }
 
 	bool IsEmpty();
-	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponTypr; }
+	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
 	FORCEINLINE int32 GetAmmo() const { return Ammo; }
 	FORCEINLINE int32 GetMagCapacity() const { return MagCapacity; }
 };
