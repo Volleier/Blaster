@@ -1,5 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+
 #include "BlasterCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
@@ -25,13 +26,11 @@ ABlasterCharacter::ABlasterCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	// 创建并初始化相机臂组件
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(GetMesh());
 	CameraBoom->TargetArmLength = 600.f;
 	CameraBoom->bUsePawnControlRotation = true;
 
-	// 创建并初始化跟随相机组件
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
@@ -39,11 +38,9 @@ ABlasterCharacter::ABlasterCharacter()
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
-	// 创建并初始化头顶小部件组件
 	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverheadWidget"));
 	OverheadWidget->SetupAttachment(RootComponent);
 
-	// 创建并初始化战斗组件
 	Combat = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 	Combat->SetIsReplicated(true);
 
@@ -54,26 +51,6 @@ ABlasterCharacter::ABlasterCharacter()
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 0.f, 850.f);
 
-	// 派生自Character类的属性
-	if (ElimBotEffect)
-	{
-		FVector ElimBotSpawnPoint(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + 200.f);
-		ElimBotComponent = UGameplayStatics::SpawnEmitterAtLocation(
-			GetWorld(),
-			ElimBotEffect,
-			ElimBotSpawnPoint,
-			GetActorRotation()
-		);
-	}
-	if (ElimBotSound)
-	{
-		UGameplayStatics::SpawnSoundAtLocation(
-			this,
-			ElimBotSound,
-			GetActorLocation()
-		);
-	}
-
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
 	NetUpdateFrequency = 66.f;
 	MinNetUpdateFrequency = 33.f;
@@ -81,11 +58,10 @@ ABlasterCharacter::ABlasterCharacter()
 	DissolveTimeline = CreateDefaultSubobject<UTimelineComponent>(TEXT("DissolveTimelineComponent"));
 }
 
-void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
+void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	// 设置需要复制的属性
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
 	DOREPLIFETIME(ABlasterCharacter, Health);
 	DOREPLIFETIME(ABlasterCharacter, bDisableGameplay);
@@ -121,16 +97,7 @@ void ABlasterCharacter::MulticastElim_Implementation()
 	}
 	bElimmed = true;
 	PlayElimMontage();
-
-	// 禁用角色移动
-	bDisableGameplay = true;
-	GetCharacterMovement()->DisableMovement();
-	if (Combat)
-	{
-		Combat->FireButtonPressed(false);
-	}
-
-	// 溶解效果开始
+	// Start dissolve effect
 	if (DissolveMaterialInstance)
 	{
 		DynamicDissolveMaterialInstance = UMaterialInstanceDynamic::Create(DissolveMaterialInstance, this);
@@ -140,9 +107,54 @@ void ABlasterCharacter::MulticastElim_Implementation()
 	}
 	StartDissolve();
 
-	// 禁用碰撞体积
+	// Disable character movement
+	bDisableGameplay = true;
+	GetCharacterMovement()->DisableMovement();
+	if (Combat)
+	{
+		Combat->FireButtonPressed(false);
+	}
+	// Disable collision
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// Spawn elim bot
+	if (ElimBotEffect)
+	{
+		FVector ElimBotSpawnPoint(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + 200.f);
+		ElimBotComponent = UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			ElimBotEffect,
+			ElimBotSpawnPoint,
+			GetActorRotation()
+		);
+	}
+	if (ElimBotSound)
+	{
+		UGameplayStatics::SpawnSoundAtLocation(
+			this,
+			ElimBotSound,
+			GetActorLocation()
+		);
+	}
+	bool bHideSniperScope = IsLocallyControlled() &&
+		Combat &&
+		Combat->bAiming &&
+		Combat->EquippedWeapon &&
+		Combat->EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle;
+	if (bHideSniperScope)
+	{
+		ShowSniperScopeWidget(false);
+	}
+}
+
+void ABlasterCharacter::ElimTimerFinished()
+{
+	ABlasterGameMode* BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
+	if (BlasterGameMode)
+	{
+		BlasterGameMode->RequestRespawn(this, Controller);
+	}
 }
 
 void ABlasterCharacter::Destroyed()
@@ -153,6 +165,7 @@ void ABlasterCharacter::Destroyed()
 	{
 		ElimBotComponent->DestroyComponent();
 	}
+
 	ABlasterGameMode* BlasterGameMode = Cast<ABlasterGameMode>(UGameplayStatics::GetGameMode(this));
 	bool bMatchNotInProgress = BlasterGameMode && BlasterGameMode->GetMatchState() != MatchState::InProgress;
 	if (Combat && Combat->EquippedWeapon && bMatchNotInProgress)
@@ -181,16 +194,40 @@ void ABlasterCharacter::Tick(float DeltaTime)
 	PollInit();
 }
 
-// 绑定输入动作和轴
-void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputComponent)
+void ABlasterCharacter::RotateInPlace(float DeltaTime)
+{
+	if (bDisableGameplay)
+	{
+		bUseControllerRotationYaw = false;
+		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+		return;
+	}
+	if (GetLocalRole() > ENetRole::ROLE_SimulatedProxy && IsLocallyControlled())
+	{
+		AimOffset(DeltaTime);
+	}
+	else
+	{
+		TimeSinceLastMovementReplication += DeltaTime;
+		if (TimeSinceLastMovementReplication > 0.25f)
+		{
+			OnRep_ReplicatedMovement();
+		}
+		CalculateAO_Pitch();
+	}
+}
+
+void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ABlasterCharacter::Jump);
+
 	PlayerInputComponent->BindAxis("MoveForward", this, &ABlasterCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ABlasterCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("Turn", this, &ABlasterCharacter::Turn);
 	PlayerInputComponent->BindAxis("LookUp", this, &ABlasterCharacter::LookUp);
+
 	PlayerInputComponent->BindAction("Equip", IE_Pressed, this, &ABlasterCharacter::EquipButtonPressed);
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ABlasterCharacter::CrouchButtonPressed);
 	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ABlasterCharacter::AimButtonPressed);
@@ -200,7 +237,6 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent *PlayerInputCo
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ABlasterCharacter::ReloadButtonPressed);
 }
 
-// 初始化组件
 void ABlasterCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
@@ -210,18 +246,16 @@ void ABlasterCharacter::PostInitializeComponents()
 	}
 }
 
-// 播放开火动画
 void ABlasterCharacter::PlayFireMontage(bool bAiming)
 {
-	if (Combat == nullptr || Combat->EquippedWeapon == nullptr)
-		return;
+	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
 
-	UAnimInstance *AnimInstance = GetMesh()->GetAnimInstance();
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && FireWeaponMontage)
 	{
 		AnimInstance->Montage_Play(FireWeaponMontage);
-		// 根据是否瞄准播放不同的动画段
-		FName SectionName = bAiming ? FName("RifleAim") : FName("RifleHip");
+		FName SectionName;
+		SectionName = bAiming ? FName("RifleAim") : FName("RifleHip");
 		AnimInstance->Montage_JumpToSection(SectionName);
 	}
 }
@@ -271,12 +305,11 @@ void ABlasterCharacter::PlayElimMontage()
 	}
 }
 
-// 播放受击反应动画
 void ABlasterCharacter::PlayHitReactMontage()
 {
-	if (Combat == nullptr || Combat->EquippedWeapon == nullptr)
-		return;
-	UAnimInstance *AnimInstance = GetMesh()->GetAnimInstance();
+	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance && HitReactMontage)
 	{
 		AnimInstance->Montage_Play(HitReactMontage);
@@ -285,20 +318,24 @@ void ABlasterCharacter::PlayHitReactMontage()
 	}
 }
 
-// 计算俯仰角
-void ABlasterCharacter::CalculateAO_Pitch()
+void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
 {
-	AO_Pitch = GetBaseAimRotation().Pitch;
-	if (AO_Pitch > 90.f && !IsLocallyControlled())
+	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
+	UpdateHUDHealth();
+	PlayHitReactMontage();
+
+	if (Health == 0.f)
 	{
-		// 将俯仰角从 [270, 360) 映射到 [-90, 0)
-		FVector2D InRange(270.f, 360.f);
-		FVector2D OutRange(-90.f, 0.f);
-		AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
+		ABlasterGameMode* BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
+		if (BlasterGameMode)
+		{
+			BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+			ABlasterPlayerController* AttackerController = Cast<ABlasterPlayerController>(InstigatorController);
+			BlasterGameMode->PlayerEliminated(this, BlasterPlayerController, AttackerController);
+		}
 	}
 }
 
-// 向前移动
 void ABlasterCharacter::MoveForward(float Value)
 {
 	if (bDisableGameplay) return;
@@ -310,7 +347,6 @@ void ABlasterCharacter::MoveForward(float Value)
 	}
 }
 
-// 向右移动
 void ABlasterCharacter::MoveRight(float Value)
 {
 	if (bDisableGameplay) return;
@@ -322,19 +358,16 @@ void ABlasterCharacter::MoveRight(float Value)
 	}
 }
 
-// 转向
 void ABlasterCharacter::Turn(float Value)
 {
 	AddControllerYawInput(Value);
 }
 
-// 向上看
 void ABlasterCharacter::LookUp(float Value)
 {
 	AddControllerPitchInput(Value);
 }
 
-// 按下装备按钮
 void ABlasterCharacter::EquipButtonPressed()
 {
 	if (bDisableGameplay) return;
@@ -351,7 +384,6 @@ void ABlasterCharacter::EquipButtonPressed()
 	}
 }
 
-// 服务器端处理装备按钮按下
 void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 {
 	if (Combat)
@@ -360,7 +392,6 @@ void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 	}
 }
 
-// 按下蹲下按钮
 void ABlasterCharacter::CrouchButtonPressed()
 {
 	if (bDisableGameplay) return;
@@ -374,7 +405,15 @@ void ABlasterCharacter::CrouchButtonPressed()
 	}
 }
 
-// 按下瞄准按钮
+void ABlasterCharacter::ReloadButtonPressed()
+{
+	if (bDisableGameplay) return;
+	if (Combat)
+	{
+		Combat->Reload();
+	}
+}
+
 void ABlasterCharacter::AimButtonPressed()
 {
 	if (bDisableGameplay) return;
@@ -384,7 +423,6 @@ void ABlasterCharacter::AimButtonPressed()
 	}
 }
 
-// 释放瞄准按钮
 void ABlasterCharacter::AimButtonReleased()
 {
 	if (bDisableGameplay) return;
@@ -394,7 +432,6 @@ void ABlasterCharacter::AimButtonReleased()
 	}
 }
 
-// 计算速度
 float ABlasterCharacter::CalculateSpeed()
 {
 	FVector Velocity = GetVelocity();
@@ -402,15 +439,13 @@ float ABlasterCharacter::CalculateSpeed()
 	return Velocity.Size();
 }
 
-// 计算瞄准偏移
 void ABlasterCharacter::AimOffset(float DeltaTime)
 {
-	if (Combat && Combat->EquippedWeapon == nullptr)
-		return;
+	if (Combat && Combat->EquippedWeapon == nullptr) return;
 	float Speed = CalculateSpeed();
 	bool bIsInAir = GetCharacterMovement()->IsFalling();
 
-	if (Speed == 0.f && !bIsInAir)
+	if (Speed == 0.f && !bIsInAir) // standing still, not jumping
 	{
 		bRotateRootBone = true;
 		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
@@ -423,7 +458,7 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 		bUseControllerRotationYaw = true;
 		TurnInPlace(DeltaTime);
 	}
-	if (Speed > 0.f || bIsInAir)
+	if (Speed > 0.f || bIsInAir) // running, or jumping
 	{
 		bRotateRootBone = false;
 		StartingAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
@@ -435,11 +470,21 @@ void ABlasterCharacter::AimOffset(float DeltaTime)
 	CalculateAO_Pitch();
 }
 
-// 模拟代理转向
+void ABlasterCharacter::CalculateAO_Pitch()
+{
+	AO_Pitch = GetBaseAimRotation().Pitch;
+	if (AO_Pitch > 90.f && !IsLocallyControlled())
+	{
+		// map pitch from [270, 360) to [-90, 0)
+		FVector2D InRange(270.f, 360.f);
+		FVector2D OutRange(-90.f, 0.f);
+		AO_Pitch = FMath::GetMappedRangeValueClamped(InRange, OutRange, AO_Pitch);
+	}
+}
+
 void ABlasterCharacter::SimProxiesTurn()
 {
-	if (Combat == nullptr || Combat->EquippedWeapon == nullptr)
-		return;
+	if (Combat == nullptr || Combat->EquippedWeapon == nullptr) return;
 	bRotateRootBone = false;
 	float Speed = CalculateSpeed();
 	if (Speed > 0.f)
@@ -469,76 +514,9 @@ void ABlasterCharacter::SimProxiesTurn()
 		return;
 	}
 	TurningInPlace = ETurningInPlace::ETIP_NotTurning;
+
 }
 
-void ABlasterCharacter::ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatorController, AActor* DamageCauser)
-{
-	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
-	UpdateHUDHealth();
-	PlayHitReactMontage();
-
-	if (Health == 0.f)
-	{
-		ABlasterGameMode* BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
-		if (BlasterGameMode)
-		{
-			BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
-			ABlasterPlayerController* AttackerController = Cast<ABlasterPlayerController>(InstigatorController);
-			BlasterGameMode->PlayerEliminated(this, BlasterPlayerController, AttackerController);
-		}
-	}
-}
-
-// 更新HUD上的健康值
-void ABlasterCharacter::UpdateHUDHealth()
-{
-	// 如果BlasterPlayerController为空，则尝试获取Controller并进行类型转换
-	BlasterPlayerController = BlasterPlayerController == nullptr
-		                          ? Cast<ABlasterPlayerController>(Controller)
-		                          : BlasterPlayerController;
-	// 如果BlasterPlayerController不为空，则更新HUD上的健康值
-	if (BlasterPlayerController)
-	{
-		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
-	}
-}
-
-// 轮询任何相关类并初始化我们的HUD
-void ABlasterCharacter::PollInit()
-{
-	if (BlasterPlayerState == nullptr)
-	{
-		BlasterPlayerState = GetPlayerState<ABlasterPlayerState>();
-		if (BlasterPlayerState)
-		{
-			BlasterPlayerState->AddToScore(0.f);
-		}
-	}
-}
-
-void ABlasterCharacter::RotateInPlace(float DeltaTime)
-{
-	if (bDisableGameplay)
-	{
-		bUseControllerRotationYaw = false;
-		TurningInPlace = ETurningInPlace::ETIP_NotTurning;
-		return;
-	}
-	if (GetLocalRole() > ENetRole::ROLE_SimulatedProxy && IsLocallyControlled())
-	{
-		AimOffset(DeltaTime);
-	}
-	else
-	{
-		TimeSinceLastMovementReplication += DeltaTime;
-		if (TimeSinceLastMovementReplication > 0.25f)
-		{
-			OnRep_ReplicatedMovement();
-		}
-		CalculateAO_Pitch();
-	}
-}
-// 跳跃
 void ABlasterCharacter::Jump()
 {
 	if (bDisableGameplay) return;
@@ -552,7 +530,6 @@ void ABlasterCharacter::Jump()
 	}
 }
 
-// 按下开火按钮
 void ABlasterCharacter::FireButtonPressed()
 {
 	if (bDisableGameplay) return;
@@ -562,7 +539,6 @@ void ABlasterCharacter::FireButtonPressed()
 	}
 }
 
-// 释放开火按钮
 void ABlasterCharacter::FireButtonReleased()
 {
 	if (bDisableGameplay) return;
@@ -572,16 +548,6 @@ void ABlasterCharacter::FireButtonReleased()
 	}
 }
 
-void ABlasterCharacter::ReloadButtonPressed()
-{
-	if (bDisableGameplay) return;
-	if (Combat)
-	{
-		Combat->Reload();
-	}
-}
-
-// 原地转向
 void ABlasterCharacter::TurnInPlace(float DeltaTime)
 {
 	if (AO_Yaw > 90.f)
@@ -604,17 +570,9 @@ void ABlasterCharacter::TurnInPlace(float DeltaTime)
 	}
 }
 
-// 多播受击反应
-void ABlasterCharacter::MulticastHit_Implementation()
-{
-	PlayHitReactMontage();
-}
-
-// 如果角色靠近则隐藏相机
 void ABlasterCharacter::HideCameraIfCharacterClose()
 {
-	if (!IsLocallyControlled())
-		return;
+	if (!IsLocallyControlled()) return;
 	if ((FollowCamera->GetComponentLocation() - GetActorLocation()).Size() < CameraThreshold)
 	{
 		GetMesh()->SetVisibility(false);
@@ -633,19 +591,31 @@ void ABlasterCharacter::HideCameraIfCharacterClose()
 	}
 }
 
-// 处理健康值变化的逻辑
 void ABlasterCharacter::OnRep_Health()
 {
 	UpdateHUDHealth();
 	PlayHitReactMontage();
 }
 
-void ABlasterCharacter::ElimTimerFinished()
+void ABlasterCharacter::UpdateHUDHealth()
 {
-	ABlasterGameMode* BlasterGameMode = GetWorld()->GetAuthGameMode<ABlasterGameMode>();
-	if (BlasterGameMode)
+	BlasterPlayerController = BlasterPlayerController == nullptr ? Cast<ABlasterPlayerController>(Controller) : BlasterPlayerController;
+	if (BlasterPlayerController)
 	{
-		BlasterGameMode->RequestRespawn(this, Controller);
+		BlasterPlayerController->SetHUDHealth(Health, MaxHealth);
+	}
+}
+
+void ABlasterCharacter::PollInit()
+{
+	if (BlasterPlayerState == nullptr)
+	{
+		BlasterPlayerState = GetPlayerState<ABlasterPlayerState>();
+		if (BlasterPlayerState)
+		{
+			BlasterPlayerState->AddToScore(0.f);
+			BlasterPlayerState->AddToDefeats(0);
+		}
 	}
 }
 
@@ -667,8 +637,7 @@ void ABlasterCharacter::StartDissolve()
 	}
 }
 
-// 设置重叠的武器
-void ABlasterCharacter::SetOverlappingWeapon(AWeapon *Weapon)
+void ABlasterCharacter::SetOverlappingWeapon(AWeapon* Weapon)
 {
 	if (OverlappingWeapon)
 	{
@@ -684,8 +653,7 @@ void ABlasterCharacter::SetOverlappingWeapon(AWeapon *Weapon)
 	}
 }
 
-// 处理重叠武器的复制
-void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon *LastWeapon)
+void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon* LastWeapon)
 {
 	if (OverlappingWeapon)
 	{
@@ -699,29 +667,23 @@ void ABlasterCharacter::OnRep_OverlappingWeapon(AWeapon *LastWeapon)
 
 bool ABlasterCharacter::IsWeaponEquipped()
 {
-	// 判断是否装备了武器
 	return (Combat && Combat->EquippedWeapon);
 }
 
 bool ABlasterCharacter::IsAiming()
 {
-	// 判断是否在瞄准
 	return (Combat && Combat->bAiming);
 }
 
-AWeapon *ABlasterCharacter::GetEquippedWeapon()
+AWeapon* ABlasterCharacter::GetEquippedWeapon()
 {
-	// 获取装备的武器
-	if (Combat == nullptr)
-		return nullptr;
+	if (Combat == nullptr) return nullptr;
 	return Combat->EquippedWeapon;
 }
 
 FVector ABlasterCharacter::GetHitTarget() const
 {
-	// 获取命中目标
-	if (Combat == nullptr)
-		return FVector();
+	if (Combat == nullptr) return FVector();
 	return Combat->HitTarget;
 }
 

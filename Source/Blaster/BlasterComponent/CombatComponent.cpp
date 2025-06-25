@@ -349,12 +349,17 @@ void UCombatComponent::InitializeCarriedAmmo()
 // 设置瞄准状态
 void UCombatComponent::SetAiming(bool bIsAiming)
 {
+	if (Character == nullptr || EquippedWeapon == nullptr) return;
 	bAiming = bIsAiming;
 	ServerSetAiming(bIsAiming); // 在服务器上同步瞄准状态
 	if (Character)
 	{
 		// 根据瞄准状态动态调整移动速度
 		Character->GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : BaseWalkSpeed;
+	}
+	if (Character->IsLocallyControlled() && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle)
+	{
+		Character->ShowSniperScopeWidget(bIsAiming); // 显示或隐藏狙击镜
 	}
 }
 
