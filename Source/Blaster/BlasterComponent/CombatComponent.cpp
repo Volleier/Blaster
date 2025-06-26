@@ -359,7 +359,7 @@ void UCombatComponent::SetAiming(bool bIsAiming)
 	}
 	if (Character->IsLocallyControlled() && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_SniperRifle)
 	{
-		Character->ShowSniperScopeWidget(bIsAiming); // 显示或隐藏狙击镜
+		Character->ShowSniperScopeWidget(bIsAiming);
 	}
 }
 
