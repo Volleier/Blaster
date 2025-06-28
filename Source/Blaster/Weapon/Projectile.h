@@ -24,6 +24,10 @@ public:
 protected:
 	// 游戏开始时调用
 	virtual void BeginPlay() override;
+	void StartDestroyTimer();
+	void DestroyTimerFinished();
+	void SpawnTrailSystem(); 
+	void ExplodeDamage();
 
 	// 碰撞事件处理函数
 	UFUNCTION()
@@ -49,16 +53,36 @@ protected:
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent *CollisionBox;
 
+	UPROPERTY(EditAnywhere)
+	class UNiagaraSystem* TrailSystem;
+
+	UPROPERTY()
+	class UNiagaraComponent* TrailSystemComponent;
+
 	// 投射物运动组件
 	UPROPERTY(VisibleAnywhere)
 	class UProjectileMovementComponent *ProjectileMovementComponent;
 
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* ProjectileMesh;
+
+	UPROPERTY(EditAnywhere)
+	float DamageInnerRadius = 200.f;
+
+	UPROPERTY(EditAnywhere)
+	float DamageOuterRadius = 500.f;
 private:
 	// 轨迹粒子系统
 	UPROPERTY(EditAnywhere)
-	UParticleSystem* Tracer;;
+	UParticleSystem* Tracer;
 
 	// 轨迹粒子系统组件
 	UPROPERTY()
 	class UParticleSystemComponent *TracerComponent;
+
+	FTimerHandle DestroyTimer;
+	
+	UPROPERTY(EditAnywhere)
+	float DestroyTime = 3.f;
+public:
 };
