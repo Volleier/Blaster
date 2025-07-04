@@ -34,6 +34,11 @@ public:
 	// 处理开火按钮按下事件
 	void FireButtonPressed(bool bIsPressed);
 
+	UFUNCTION(BlueprintCallable)
+	void ShotgunShellReload();
+
+	void JumpToShotgunEnd();
+
 protected:
 	virtual void BeginPlay() override;
 	// 设置瞄准状态
@@ -70,6 +75,8 @@ protected:
 	void HandleReload();
 
 	int32 AmountToReload();
+
+	void UpdateShotgunAmmoValues();
 
 private:
 	// 角色指针

@@ -165,6 +165,11 @@ bool AWeapon::IsEmpty()
 	return Ammo <= 0;
 }
 
+bool AWeapon::IsFull()
+{
+	return Ammo == MagCapacity;
+}
+
 // 复制武器状态
 void AWeapon::OnRep_WeaponState()
 {
