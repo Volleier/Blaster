@@ -80,6 +80,11 @@ public:
 	UPROPERTY(EditAnywhere)
 	class USoundCue* EquipSound;
 
+	/** 
+	* 允许或禁止自定义深度
+	*/
+	void EnableCustomDepth(bool bEnable);
+
 protected:
 	// 游戏开始时调用的函数
 	virtual void BeginPlay() override;

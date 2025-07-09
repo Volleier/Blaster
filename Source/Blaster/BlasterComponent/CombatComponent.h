@@ -87,7 +87,7 @@ private:
 	UPROPERTY()
 	class ABlasterHUD *HUD;
 
-	// 装备的武器，使用OnRep_EquippedWeapon进行同步
+	// 装备的武器，使用OnRep_EquippedWeapon进行同步d
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon *EquippedWeapon;
 
