@@ -24,6 +24,7 @@ public:
 	void PlayFireMontage(bool bAiming);
 	void PlayReloadMontage();
 	void PlayElimMontage();
+	void PlayThrowGrenadeMontage();
 
 	// 多播函数，用于处理命中效果
 	UFUNCTION(NetMulticast, Unreliable)
@@ -78,6 +79,8 @@ protected:
 	void CalculateAO_Pitch();
 	// 代理转向
 	void SimProxiesTurn();
+	// 转向按钮按下
+	void GrenadeButtonPressed();
 
 	// 角色接受伤害
 	UFUNCTION()
@@ -147,6 +150,10 @@ private:
 	// 消除动画蒙太奇
 	UPROPERTY(EditAnywhere, Category = Combat)
 	UAnimMontage* ElimMontage;
+
+	// 投掷手榴弹动画蒙太奇
+	UPROPERTY(EditAnywhere, Category = Combat)
+	UAnimMontage* ThrowGrenadeMontage;
 
 	// 如果角色靠近则隐藏摄像机
 	void HideCameraIfCharacterClose();

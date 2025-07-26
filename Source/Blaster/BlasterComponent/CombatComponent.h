@@ -39,6 +39,9 @@ public:
 
 	void JumpToShotgunEnd();
 
+	UFUNCTION(BlueprintCallable)
+	void ThrowGrenadeFinished();
+
 protected:
 	virtual void BeginPlay() override;
 	// 设置瞄准状态
@@ -75,6 +78,11 @@ protected:
 	void HandleReload();
 
 	int32 AmountToReload();
+
+	void ThrowGrenade();
+
+	UFUNCTION(Server, Reliable)
+	void ServerThrowGrenade();
 
 	void UpdateShotgunAmmoValues();
 
