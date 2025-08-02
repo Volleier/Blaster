@@ -13,6 +13,7 @@
 #include "TimerManager.h"
 #include "Sound/SoundCue.h"
 #include "Blaster/Character/BlasterAnimInstance.h"
+#include "Blaster/Weapon/Projectile.h"
 
 // 战斗组件构造函数
 UCombatComponent::UCombatComponent()
@@ -177,7 +178,7 @@ void UCombatComponent::HandleReload()
 }
 
 int32 UCombatComponent::AmountToReload()
-{
+{	
 	if (EquippedWeapon == nullptr) return 0;
 	int32 RoomInMag = EquippedWeapon->GetMagCapacity() - EquippedWeapon->GetAmmo();
 
@@ -192,6 +193,7 @@ int32 UCombatComponent::AmountToReload()
 
 void UCombatComponent::ThrowGrenade()
 {
+	if (CombatState != ECombatState::ECS_Unoccupied || EquippedWeapon == nullptr) return;
 	if (CombatState != ECombatState::ECS_Unoccupied) return;
 	CombatState = ECombatState::ECS_ThrowingGrenade;
 	if (Character)
@@ -516,6 +518,24 @@ void UCombatComponent::ThrowGrenadeFinished()
 void UCombatComponent::LaunchGrenade()
 {
 	ShowAttachedGrenade(false);
+	if (Character && Character->HasAuthority() && GrenadeClass && Character->GetAttachedGrenade())
+	{
+		const FVector StartingLocation = Character->GetAttachedGrenade()->GetComponentLocation();
+		FVector ToTarget = HitTarget - StartingLocation;
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = Character;
+		SpawnParams.Instigator = Character;
+		UWorld* World = GetWorld();
+		if (World)
+		{
+			World->SpawnActor<AProjectile>(
+				GrenadeClass,
+				StartingLocation,
+				ToTarget.Rotation(),
+				SpawnParams
+			);
+		}
+	}
 }
 
 void UCombatComponent::Fire()
