@@ -34,9 +34,10 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(UCombatComponent, bAiming); // 复制瞄准状态到所有客户端
 	DOREPLIFETIME_CONDITION(UCombatComponent, CarriedAmmo, COND_OwnerOnly); // 只在所有者客户端上复制携带的弹药
 	DOREPLIFETIME(UCombatComponent, CombatState); // 复制战斗状态到所有客户端
+	DOREPLIFETIME(UCombatComponent, Grenades); // 复制手雷数量到所有客户端
 }
 
-// 组件开始播放时的初始化
+// 组件开始播放时的初始化t
 void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -193,6 +194,7 @@ int32 UCombatComponent::AmountToReload()
 
 void UCombatComponent::ThrowGrenade()
 {
+	if (Grenades == 0) return;
 	if (CombatState != ECombatState::ECS_Unoccupied || EquippedWeapon == nullptr) return;
 	if (CombatState != ECombatState::ECS_Unoccupied) return;
 	CombatState = ECombatState::ECS_ThrowingGrenade;
@@ -206,6 +208,11 @@ void UCombatComponent::ThrowGrenade()
 	{
 		ServerThrowGrenade();
 	}
+	if (Character && Character->HasAuthority())
+	{
+		Grenades = FMath::Clamp(Grenades - 1, 0, MaxGrenades);
+		UpdateHUDGrenades();
+	}
 }
 
 void UCombatComponent::DropEquippedWeapon()
@@ -218,12 +225,24 @@ void UCombatComponent::DropEquippedWeapon()
 
 void UCombatComponent::ServerThrowGrenade_Implementation()
 {
+	if (Grenades == 0) return;	
 	CombatState = ECombatState::ECS_ThrowingGrenade;
 	if (Character)
 	{
 		Character->PlayThrowGrenadeMontage();
 		AttachActorToLeftHand(EquippedWeapon);
 		ShowAttachedGrenade(true);
+	}
+	Grenades = FMath::Clamp(Grenades - 1, 0, MaxGrenades);
+	UpdateHUDGrenades();
+}
+
+void UCombatComponent::UpdateHUDGrenades()
+{
+	Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+	if (Controller)
+	{
+		Controller->SetHUDGrenades(Grenades);
 	}
 }
 
@@ -263,6 +282,11 @@ void UCombatComponent::UpdateShotgunAmmoValues()
 	{
 		JumpToShotgunEnd();
 	}
+}
+
+void UCombatComponent::OnRep_Grenades()
+{
+	UpdateHUDGrenades();
 }
 
 void UCombatComponent::ServerReload_Implementation()
