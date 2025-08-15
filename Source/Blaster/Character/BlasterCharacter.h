@@ -45,6 +45,8 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowSniperScopeWidget(bool bShowScope);
 
+	void UpdateHUDHealth();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -86,7 +88,7 @@ protected:
 	UFUNCTION()
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
 		class AController* InstigatorController, AActor* DamageCauser);
-	void UpdateHUDHealth();
+
 	// 轮询任何相关类并初始化我们的HUD
 	void PollInit();
 
@@ -189,7 +191,7 @@ private:
 
 	// 生命值变化的回调函数
 	UFUNCTION()
-	void OnRep_Health();
+	void OnRep_Health(float LastHealth);
 
 	// 角色控制器
 	UPROPERTY()
@@ -274,6 +276,7 @@ public:
 	FORCEINLINE bool IsElimmed() const { return bElimmed; }
 
 	FORCEINLINE float GetHealth() const { return Health; }
+	FORCEINLINE void SetHealth(float Amount) { Health = Amount; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
 
 	FORCEINLINE UCombatComponent* GetCombat() const { return Combat; }
@@ -282,4 +285,6 @@ public:
 	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const { return AttachedGrenade; }
 
 	ECombatState GetCombatState() const;
+
+	FORCEINLINE UBuffComponent* GetBuff() const { return Buff; }
 };
