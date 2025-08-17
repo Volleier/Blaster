@@ -46,6 +46,7 @@ public:
 	void ShowSniperScopeWidget(bool bShowScope);
 
 	void UpdateHUDHealth();
+	void UpdateHUDShield();
 
 protected:
 	virtual void BeginPlay() override;
@@ -192,6 +193,16 @@ private:
 	// 生命值变化的回调函数
 	UFUNCTION()
 	void OnRep_Health(float LastHealth);
+
+	// 玩家护盾
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	float MaxShield = 100.f;
+
+	UPROPERTY(ReplicatedUsing = OnRep_Shield, VisibleAnywhere, Category = "Player Stats")
+	float Shield = 100.f;
+
+	UFUNCTION()
+	void OnRep_Shield(float LastShield);
 
 	// 角色控制器
 	UPROPERTY()
