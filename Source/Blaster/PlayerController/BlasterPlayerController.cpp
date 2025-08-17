@@ -240,7 +240,7 @@ void ABlasterPlayerController::SetHUDHealth(float Health, float MaxHealth)
 	}
 	else
 	{
-		bInitializeCharacterOverlay = true;
+		bInitializeShield = true;
 		HUDHealth = Health;
 		HUDMaxHealth = MaxHealth;
 	}
@@ -259,7 +259,7 @@ void ABlasterPlayerController::SetHUDScore(float Score)
 	}
 	else
 	{
-		bInitializeCharacterOverlay = true;
+		bInitializeShield = true;
 		HUDScore = Score;
 	}
 }
@@ -277,7 +277,7 @@ void ABlasterPlayerController::SetHUDDefeats(int32 Defeats)
 	}
 	else
 	{
-		bInitializeCharacterOverlay = true;
+		bInitializeShield = true;
 		HUDDefeats = Defeats;
 	}
 }
@@ -365,6 +365,7 @@ void ABlasterPlayerController::SetHUDGrenades(int32 Grenades)
 	}
 	else
 	{
+		bInitializeGrenades = true;
 		HUDGrenades = Grenades;
 	}
 }
@@ -423,7 +424,7 @@ void ABlasterPlayerController::SetHUDShield(float Shield, float MaxShield)
 	}
 	else
 	{
-		bInitializeCharacterOverlay = true;
+		bInitializeHealth = true;
 		HUDShield = Shield;
 		HUDMaxShield = MaxShield;
 	}
