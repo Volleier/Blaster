@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "Casing.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
@@ -35,7 +33,7 @@ void ACasing::BeginPlay()
 	CasingMesh->AddImpulse(GetActorForwardVector() * ShellEjectionImpulse);
 }
 
-void ACasing::OnHit(UPrimitiveComponent *HitComponent, AActor *OtherActor, UPrimitiveComponent *OtherComponent, FVector NormalImpulse, const FHitResult &Hit)
+void ACasing::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
 {
 	// 如果ShellSound不为空，则在弹壳位置播放声音
 	if (ShellSound)

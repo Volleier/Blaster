@@ -12,11 +12,11 @@ struct FHUDPackage
 {
 	GENERATED_BODY()
 public:
-	class UTexture2D *CrosshairsCenter; // 中心准星纹理
-	UTexture2D *CrosshairsLeft;			// 左侧准星纹理
-	UTexture2D *CrosshairsRight;		// 右侧准星纹理
-	UTexture2D *CrosshairsTop;			// 顶部准星纹理
-	UTexture2D *CrosshairsBottom;		// 底部准星纹理
+	class UTexture2D* CrosshairsCenter; // 中心准星纹理
+	UTexture2D* CrosshairsLeft;			// 左侧准星纹理
+	UTexture2D* CrosshairsRight;		// 右侧准星纹理
+	UTexture2D* CrosshairsTop;			// 顶部准星纹理
+	UTexture2D* CrosshairsBottom;		// 底部准星纹理
 	float CrosshairSpread;				// 准星扩散值
 	FLinearColor CrosshairColor;		// 准星颜色
 };
@@ -34,14 +34,14 @@ public:
 	virtual void DrawHUD() override;
 
 	// 内联函数，用于设置HUD包
-	FORCEINLINE void SetHUDPackage(const FHUDPackage &Package) { HUDPackage = Package; }
+	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
 
 	// 编辑属性，玩家状态的类别，用于指定角色覆盖类
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	TSubclassOf<class UUserWidget> CharacterOverlayClass;
 	// 角色覆盖指针
 	UPROPERTY()
-	class UCharacterOverlay *CharacterOverlay; 
+	class UCharacterOverlay* CharacterOverlay;
 
 	// 添加角色覆盖
 	void AddCharacterOverlay();
@@ -62,7 +62,7 @@ private:
 	FHUDPackage HUDPackage; // HUD包实例
 
 	// 绘制准星函数
-	void DrawCrosshairs(UTexture2D *Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor CrosshairColor);
+	void DrawCrosshairs(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor CrosshairColor);
 
 	// 编辑属性，最大准星扩散值
 	UPROPERTY(EditAnywhere)

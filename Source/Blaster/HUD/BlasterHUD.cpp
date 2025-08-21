@@ -24,7 +24,7 @@ void ABlasterHUD::BeginPlay()
 // 添加角色覆盖层
 void ABlasterHUD::AddCharacterOverlay()
 {
-	APlayerController *PlayerController = GetOwningPlayerController();
+	APlayerController* PlayerController = GetOwningPlayerController();
 	if (PlayerController && CharacterOverlayClass)
 	{
 		// 创建角色覆盖层并添加到视口
@@ -81,7 +81,7 @@ void ABlasterHUD::DrawHUD()
 }
 
 // 绘制准星
-void ABlasterHUD::DrawCrosshairs(UTexture2D *Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor CrosshairColor)
+void ABlasterHUD::DrawCrosshairs(UTexture2D* Texture, FVector2D ViewportCenter, FVector2D Spread, FLinearColor CrosshairColor)
 {
 	// 获取纹理宽度和高度
 	const float TextureWidth = Texture->GetSizeX();

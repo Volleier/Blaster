@@ -8,107 +8,112 @@
 #include "BlasterAnimInstance.generated.h"
 
 /**
+ * UBlasterAnimInstance
  *
+ * 动画实例类，用于处理角色动画相关的变量和逻辑。
  */
 UCLASS()
 class BLASTER_API UBlasterAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
+
 public:
-	// 初始化动画
+	// 初始化动画实例，在动画蓝图创建时调用
 	virtual void NativeInitializeAnimation() override;
-	// 更新动画
+
+	// 每帧更新动画实例，处理动画相关变量
 	virtual void NativeUpdateAnimation(float DeltaTime) override;
 
-	// 装备的武器
-	class AWeapon *EquippedWeapon;
+	// 当前装备的武器实例指针
+	class AWeapon* EquippedWeapon;
 
 private:
-	// Blaster角色
-	UPROPERTY(BlueprintReadOnly, Category = Character, meta = (AllowPrivateAccess = "true"))
-	class ABlasterCharacter *BlasterCharacter;
+	// 角色实例指针
+	UPROPERTY(BlueprintReadOnly, Category = "Character", meta = (AllowPrivateAccess = "true"))
+	class ABlasterCharacter* BlasterCharacter;
 
-	// 速度
-	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	// 角色移动速度
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float Speed;
 
-	// 是否在空中
-	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	// 是否处于空中（跳跃或下落）
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	bool bIsInAir;
 
-	// 是否在加速
-	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	// 是否正在加速
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	bool bIsAccelerating;
 
 	// 是否装备武器
-	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	bool bWeaponEquipped;
 
-	// 是否蹲下
-	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	// 是否处于蹲下状态
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	bool bIsCrouched;
 
-	// 是否瞄准
-	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	// 是否处于瞄准状态
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	bool bAiming;
 
-	// 偏航偏移
-	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	// 偏航偏移量（用于瞄准偏移动画）
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float YawOffset;
 
-	// 倾斜
-	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	// 倾斜量（角色左右倾斜）
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float Lean;
 
 	// 上一帧角色旋转
 	FRotator CharacterRotationLastFrame;
+
 	// 当前帧角色旋转
 	FRotator CharacterRotation;
-	// 旋转差值
+
+	// 旋转差值（用于计算倾斜等动画效果）
 	FRotator DeltaRotation;
 
-	// 瞄准偏航
-	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	// 瞄准偏航角度
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float AO_Yaw;
 
-	// 瞄准俯仰
-	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	// 瞄准俯仰角度
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float AO_Pitch;
 
-	// 左手变换
-	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	// 左手变换（用于武器握持动画）
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	FTransform LeftHandTransform;
 
-	// 转向状态
-	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	// 转向状态（枚举类型，表示角色转向动画状态）
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	ETurningInPlace TurningInPlace;
 
-	// 右手旋转
-	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	// 右手旋转（用于武器瞄准动画）
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	FRotator RightHandRotation;
 
-	// 是否本地控制
-	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	// 是否本地控制（用于区分本地玩家与网络玩家）
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	bool bLocallyControlled;
 
-	// 是否旋转根骨骼
-	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	// 是否旋转根骨骼（用于角色死亡或特殊动画）
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	bool bRotateRootBone;
 
-	// 是否消除
-	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	// 是否被消除（角色死亡状态）
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	bool bElimmed;
 
-	// 使用FABRIK
-	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	// 是否启用FABRIK IK（用于手部IK动画）
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	bool bUseFABRIK;
 
-	// 使用瞄准偏移
-	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	// 是否启用瞄准偏移动画
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	bool bUseAimOffsets;
 
-	// 使用转向
-	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	// 是否启用右手变换（用于特殊武器动画）
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	bool bTransformRightHand;
-
 };

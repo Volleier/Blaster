@@ -17,7 +17,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
 	/**
-	* 复制通知
+	* 锟斤拷锟斤拷通知
 	*/
 	virtual void OnRep_Score() override;
 

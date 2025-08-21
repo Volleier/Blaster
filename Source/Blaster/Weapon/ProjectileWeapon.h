@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -13,7 +11,7 @@ class BLASTER_API AProjectileWeapon : public AWeapon
 
 public:
 	// 重写父类的 Fire 方法，使用传入的目标位置进行射击
-	virtual void Fire(const FVector &HitTarget) override;
+	virtual void Fire(const FVector& HitTarget) override;
 
 private:
 	// 可在编辑器中设置的属性，用于指定投射物的类

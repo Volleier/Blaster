@@ -6,19 +6,21 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Blaster/Weapon/Weapon.h"
 
+// 动画实例初始化函数
 void UBlasterAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
-	// 初始化BlasterCharacter
+	// 初始化 BlasterCharacter 指针，指向当前拥有者的 Pawn
 	BlasterCharacter = Cast<ABlasterCharacter>(TryGetPawnOwner());
 }
 
+// 动画实例每帧更新函数
 void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
 
-	// 如果BlasterCharacter为空，则尝试获取PawnOwner
+	// 如果 BlasterCharacter 为空，则尝试重新获取 PawnOwner
 	if (BlasterCharacter == nullptr)
 	{
 		BlasterCharacter = Cast<ABlasterCharacter>(TryGetPawnOwner());
@@ -26,37 +28,46 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	if (BlasterCharacter == nullptr)
 		return;
 
-	// 获取角色速度并计算速度大小
+	// 获取角色速度并忽略 Z 轴分量
 	FVector Velocity = BlasterCharacter->GetVelocity();
-	Velocity.Z = 0.f;		 // 忽略Z轴速度
-	Speed = Velocity.Size(); // 计算速度大小
+	Velocity.Z = 0.f;
+	Speed = Velocity.Size(); // 计算水平速度大小
 
 	// 判断角色是否在空中
 	bIsInAir = BlasterCharacter->GetCharacterMovement()->IsFalling();
-	// 判断角色是否在加速
+
+	// 判断角色是否正在加速
 	bIsAccelerating = BlasterCharacter->GetCharacterMovement()->GetCurrentAcceleration().Size() > 0.f ? true : false;
+
 	// 判断角色是否装备武器
 	bWeaponEquipped = BlasterCharacter->IsWeaponEquipped();
-	// 获取装备的武器
+
+	// 获取当前装备的武器
 	EquippedWeapon = BlasterCharacter->GetEquippedWeapon();
-	// 判断角色是否蹲下
+
+	// 判断角色是否处于蹲下状态
 	bIsCrouched = BlasterCharacter->bIsCrouched;
-	// 判断角色是否在瞄准
+
+	// 判断角色是否处于瞄准状态
 	bAiming = BlasterCharacter->IsAiming();
+
 	// 获取角色的转向状态
 	TurningInPlace = BlasterCharacter->GetTurningInPlace();
-	// 获取骨骼的旋转角度
+
+	// 获取是否需要旋转根骨骼
 	bRotateRootBone = BlasterCharacter->ShouldRotateRootBone();
+
 	// 获取角色是否被淘汰
 	bElimmed = BlasterCharacter->IsElimmed();
-	// 计算偏移偏航角用于侧移
+
+	// 计算偏移偏航角用于侧移动画
 	FRotator AimRotation = BlasterCharacter->GetBaseAimRotation();								   // 获取角色的基础瞄准旋转
 	FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(BlasterCharacter->GetVelocity()); // 根据速度向量计算旋转
 	FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(MovementRotation, AimRotation); // 计算旋转差值
 	DeltaRotation = FMath::RInterpTo(DeltaRotation, DeltaRot, DeltaTime, 6.f);					   // 插值计算新的旋转差值
 	YawOffset = DeltaRotation.Yaw;																   // 设置偏航角度
 
-	// 计算角色的倾斜角度
+	// 计算角色的倾斜角度（Lean）
 	CharacterRotationLastFrame = CharacterRotation;																	  // 保存上一帧的角色旋转
 	CharacterRotation = BlasterCharacter->GetActorRotation();														  // 获取当前角色旋转
 	const FRotator Delta = UKismetMathLibrary::NormalizedDeltaRotator(CharacterRotation, CharacterRotationLastFrame); // 计算旋转差值
@@ -71,42 +82,63 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	// 如果装备了武器且武器和角色的网格体存在
 	if (bWeaponEquipped && EquippedWeapon && EquippedWeapon->GetWeaponMesh() && BlasterCharacter->GetMesh())
 	{
-		// 获取左手的变换信息
+		// 获取左手的世界空间变换信息
 		LeftHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("LeftHandSocket"), ERelativeTransformSpace::RTS_World);
+
+		// 将左手位置和旋转转换到角色右手骨骼空间
 		FVector OutPosition;
 		FRotator OutRotation;
-		BlasterCharacter->GetMesh()->TransformToBoneSpace(FName("hand_r"), LeftHandTransform.GetLocation(), FRotator::ZeroRotator, OutPosition, OutRotation); // 转换到骨骼空间
-		LeftHandTransform.SetLocation(OutPosition);																											  // 设置左手位置
-		LeftHandTransform.SetRotation(FQuat(OutRotation));																									  // 设置左手旋转
+		BlasterCharacter->GetMesh()->TransformToBoneSpace(
+			FName("hand_r"),
+			LeftHandTransform.GetLocation(),
+			FRotator::ZeroRotator,
+			OutPosition,
+			OutRotation);
+		LeftHandTransform.SetLocation(OutPosition);		   // 设置左手位置
+		LeftHandTransform.SetRotation(FQuat(OutRotation)); // 设置左手旋转
 
-		FTransform RightHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("Hand_R"), ERelativeTransformSpace::RTS_World); // 获取右手变换信息
+		// 获取右手的世界空间变换信息
+		FTransform RightHandTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("Hand_R"), ERelativeTransformSpace::RTS_World);
+
+		// 计算右手的旋转，使其朝向目标
 		RightHandRotation = UKismetMathLibrary::FindLookAtRotation(
 			RightHandTransform.GetLocation(),
-			RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget())); // 计算右手旋转
+			RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget()));
 
+		// 如果是本地控制的角色，进行右手旋转插值
 		if (BlasterCharacter->IsLocallyControlled())
 		{
-			bLocallyControlled = true;																													   // 设置本地控制标志
-			FTransform MuzzleTipTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("MuzzleFlash"), ERelativeTransformSpace::RTS_World); // 获取枪口变换信息
-			// 绘制射线
-			// DrawDebugLine(
-			//	GetWorld(),
-			//	MuzzleTipTransform.GetLocation(),
-			//	BlasterCharacter->GetHitTarget(),
-			//	FColor::Orange
-			// );
+			bLocallyControlled = true; // 设置本地控制标志
+
+			// 获取枪口的世界空间变换信息
+			FTransform MuzzleTipTransform = EquippedWeapon->GetWeaponMesh()->GetSocketTransform(FName("MuzzleFlash"), ERelativeTransformSpace::RTS_World);
+
+			// 可选：绘制射线用于调试
+			/*
+			DrawDebugLine(
+				GetWorld(),
+				MuzzleTipTransform.GetLocation(),
+				BlasterCharacter->GetHitTarget(),
+				FColor::Orange
+			);
+			*/
+
+			// 计算瞄准旋转
 			FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(
 				RightHandTransform.GetLocation(),
-				RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget())); // 计算瞄准旋转
+				RightHandTransform.GetLocation() + (RightHandTransform.GetLocation() - BlasterCharacter->GetHitTarget()));
+
+			// 插值计算新的右手旋转
 			RightHandRotation = FMath::RInterpTo(
 				RightHandRotation,
 				LookAtRotation,
 				DeltaTime,
-				30.f); // 插值计算新的右手旋转
+				30.f);
 		}
 	}
-	bUseFABRIK = BlasterCharacter->GetCombatState() != ECombatState::ECS_Reloading;
 
+	// 设置动画相关的布尔变量
+	bUseFABRIK = BlasterCharacter->GetCombatState() != ECombatState::ECS_Reloading;
 	bUseFABRIK = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied;
 	bUseAimOffsets = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied && !BlasterCharacter->GetDisableGameplay();
 	bTransformRightHand = BlasterCharacter->GetCombatState() == ECombatState::ECS_Unoccupied && !BlasterCharacter->GetDisableGameplay();

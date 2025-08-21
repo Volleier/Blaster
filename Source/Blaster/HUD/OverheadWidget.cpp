@@ -13,7 +13,7 @@ void UOverheadWidget::SetDisplayText(FString TextToDisplay)
 }
 
 // 显示玩家的网络角色
-void UOverheadWidget::ShowPlayerNetRole(APawn *InPawn)
+void UOverheadWidget::ShowPlayerNetRole(APawn* InPawn)
 {
 	ENetRole RemoteRole = InPawn->GetRemoteRole();
 	FString Role;
