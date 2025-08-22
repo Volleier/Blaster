@@ -45,7 +45,12 @@ void APickup::BeginPlay()
 	// 仅在服务器端绑定重叠事件
 	if (HasAuthority())
 	{
-		OverlapSphere->OnComponentBeginOverlap.AddDynamic(this, &APickup::OnSphereOverlap);
+		GetWorldTimerManager().SetTimer(
+			BindOverlapTimer,
+			this,
+			&APickup::BindOverlapTimerFinished,
+			BindOverlapTime
+		);
 	}
 }
 
@@ -67,7 +72,12 @@ void APickup::Tick(float DeltaTime)
 	if (PickupMesh)
 	{
 		// 让拾取物体旋转
-		PickupMesh->AddWorldRotation(FRotator(0.f, BaseTurnRate * DeltaTime, 0.f));
+		PickupMesh->AddWorldRotation(
+			FRotator(0.f, 
+				BaseTurnRate * 
+				DeltaTime, 0.f
+			)
+		);
 	}
 }
 
@@ -93,4 +103,13 @@ void APickup::Destroyed()
 			GetActorLocation(),
 			GetActorRotation());
 	}
+}
+
+// 定时器结束后绑定重叠事件
+void APickup::BindOverlapTimerFinished()
+{
+	OverlapSphere->OnComponentBeginOverlap.AddDynamic(
+		this,
+		&APickup::OnSphereOverlap
+	);
 }

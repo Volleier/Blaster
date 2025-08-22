@@ -70,5 +70,12 @@ private:
 	UPROPERTY(EditAnywhere)
 	class UNiagaraSystem* PickupEffect;
 
+    // 定时器句柄，用于延迟绑定重叠事件
+    FTimerHandle BindOverlapTimer;
+    // 绑定重叠事件的延迟时间（秒），默认0.25秒
+    float BindOverlapTime = 0.25f;
+    // 定时器回调函数，定时器结束后绑定重叠事件
+    void BindOverlapTimerFinished();
+
 public:
 };
