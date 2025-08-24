@@ -97,6 +97,9 @@ public:
 	 * 允许或禁止自定义深度（用于描边等效果）
 	 */
 	void EnableCustomDepth(bool bEnable);
+	
+	// 是否销毁武器
+	bool bDestroyWeapon = false;
 
 protected:
 	// 游戏开始时调用

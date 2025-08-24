@@ -256,4 +256,16 @@ private:
 
 	/** HUD最大护盾值 */
 	float HUDMaxShield;
+
+	/** HUD携带弹药 */
+	float HUDCarriedAmmo;
+
+	/** 是否初始化携带弹药 */
+	bool bInitializeCarriedAmmo = false;
+
+	/** HUD武器弹药 */
+	float HUDWeaponAmmo;
+
+	/** 是否初始化武器弹药 */
+	bool bInitializeWeaponAmmo = false;
 };

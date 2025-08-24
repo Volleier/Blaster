@@ -78,6 +78,12 @@ public:
 	// 更新HUD护盾
 	void UpdateHUDShield();
 
+	// 更新HUD弹药
+	void UpdateHUDAmmo();
+
+	// 设置默认武器
+	void SpawnDefaultWeapon();
+
 protected:
 	// 游戏开始时调用
 	virtual void BeginPlay() override;
@@ -332,6 +338,13 @@ private:
 	 */
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* AttachedGrenade;
+
+
+	/**
+	* 默认武器
+	*/
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AWeapon> DefaultWeaponClass;
 
 public:
 	// 设置重叠武器
