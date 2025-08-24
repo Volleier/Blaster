@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+	// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -83,6 +83,10 @@ protected:
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
 
+	// 副武器同步回调
+	UFUNCTION()
+	void OnRep_SecondaryWeapon();
+
 	// 执行开火操作
 	void Fire();
 
@@ -130,8 +134,14 @@ protected:
 	// 附加Actor到左手
 	void AttachActorToLeftHand(AActor* ActorToAttach);
 
+	// 附加Actor到背包
+	void AttachActorToBackpack(AActor* ActorToAttach);
+
 	// 更新携带弹药
 	void UpdateCarriedAmmo();
+
+	// 播放装备武器音效
+	void PlayEquipWeaponSound(AWeapon* WeaponToEquip);
 
 	// 播放装备武器音效
 	void PlayEquipWeaponSound();
@@ -144,6 +154,12 @@ protected:
 
 	// 更新霰弹枪弹药数值
 	void UpdateShotgunAmmoValues();
+
+	// 装备主武器
+	void EquipPrimaryWeapon(AWeapon* WeaponToEquip);
+	
+	// 装备副武器
+	void EquipSecondaryWeapon(AWeapon* WeaponToEquip);
 
 	// 当前手雷数量（同步，带回调）
 	UPROPERTY(ReplicatedUsing = OnRep_Grenades)
@@ -176,6 +192,10 @@ private:
 	// 当前装备的武器（同步，带回调）
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon* EquippedWeapon;
+
+	// 副武器（同步，带回调）
+	UPROPERTY(ReplicatedUsing = OnRep_SecondaryWeapon)
+	AWeapon* SecondaryWeapon;
 
 	// 是否处于瞄准状态（同步）
 	UPROPERTY(Replicated)
