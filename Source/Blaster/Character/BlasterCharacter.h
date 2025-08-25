@@ -139,6 +139,10 @@ protected:
 	// 投掷手榴弹按钮按下
 	void GrenadeButtonPressed();
 
+	// 丢弃或销毁武器
+	void DropOrDestroyWeapon(AWeapon* Weapon);
+	void DropOrDestroyWeapons();
+
 	// 角色接受伤害
 	UFUNCTION()
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType,
