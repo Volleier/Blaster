@@ -33,6 +33,9 @@ public:
 	// 网络同步属性
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	// 切换武器
+	void SwapWeapons();
+
 	// 装备武器
 	void EquipWeapon(class AWeapon* WeaponToEquip);
 
@@ -317,4 +320,7 @@ private:
 public:
 	// 获取当前手雷数量
 	FORCEINLINE int32 GetGrenades() const { return Grenades; }
+
+	// 是否切换武器
+	bool ShouldSwapWeapons();
 };

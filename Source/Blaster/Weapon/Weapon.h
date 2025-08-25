@@ -12,6 +12,7 @@ UENUM(BlueprintType)
 enum class EWeaponState : uint8
 {
 	EWS_Initial UMETA(DisplayName = "初始状态"),      // 初始状态
+	EWS_EquippedSecondary UMETA(DisplayName = "Equipped Secondary"), // 副手装备状态
 	EWS_Equipped UMETA(DisplayName = "已装备"),      // 已装备状态
 	EWS_Dropped UMETA(DisplayName = "已丢弃"),       // 已丢弃状态
 	EWS_MAX UMETA(DisplayName = "默认最大值")        // 默认最大值
@@ -104,6 +105,17 @@ public:
 protected:
 	// 游戏开始时调用
 	virtual void BeginPlay() override;
+
+	// 当武器状态被设置时调用
+	virtual void OnWeaponStateSet();
+
+	// 武器被装备或丢弃时调用
+	virtual void OnEquipped();
+	virtual void OnDropped();
+
+	// 当武器被主手或副手装备时调用
+	virtual void OnEquippedSecondary();
+
 
 	// 球体组件重叠开始时调用
 	UFUNCTION()
