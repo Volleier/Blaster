@@ -56,4 +56,12 @@ public:
 	/** 手雷数量文本控件 */
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* GrenadesText;
+
+	/** 高Ping图像 */
+	UPROPERTY(meta = (BindWidget))
+	class UImage* HighPingImage;
+
+	/** 高Ping图像动画 */
+	UPROPERTY(meta = (BindWidgetAnim), Transient)
+	UWidgetAnimation* HighPingAnimation;
 };

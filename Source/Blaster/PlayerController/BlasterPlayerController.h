@@ -183,6 +183,25 @@ protected:
 	UFUNCTION(Client, Reliable)
 	void ClientJoinMidgame(FName StateOfMatch, float Warmup, float Match, float Cooldown, float StartingTime);
 
+	/**
+	* 高延迟警告处理函数
+	* 当检测到玩家网络延迟过高时，触发HUD警告显示等相关逻辑
+	*/
+	void HighPingWarning();
+
+	/**
+	* 停止高延迟警告处理函数
+	* 当玩家网络延迟恢复正常时，关闭HUD警告显示等相关逻辑
+	*/
+	void StopHighPingWarning();
+
+	/**
+	* 检查玩家网络延迟
+	* @param DeltaTime 距离上一帧的时间（秒）
+	* 定期检测玩家的Ping值，判断是否需要触发高延迟警告
+	*/
+	void CheckPing(float DeltaTime);
+
 private:
 	/** HUD对象指针 */
 	UPROPERTY()
@@ -268,4 +287,22 @@ private:
 
 	/** 是否初始化武器弹药 */
 	bool bInitializeWeaponAmmo = false;
+
+	/** 高延迟计时运行时长（秒） */
+	float HighPingRunningTime = 0.f;
+
+	/** 高延迟警告持续时间（秒），可在编辑器中设置 */
+	UPROPERTY(EditAnywhere)
+	float HighPingDuration = 5.f;
+
+	/** Ping动画运行时长（秒） */
+	float PingAnimationRunningTime = 0.f;
+
+	/** 检查Ping的频率（秒），可在编辑器中设置 */
+	UPROPERTY(EditAnywhere)
+	float CheckPingFrequency = 20.f;
+
+	/** 高延迟阈值（毫秒），可在编辑器中设置 */
+	UPROPERTY(EditAnywhere)
+	float HighPingThreshold = 50.f;
 };

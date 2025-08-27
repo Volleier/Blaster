@@ -14,6 +14,7 @@
 #include "Blaster/BlasterComponent/CombatComponent.h"
 #include "Blaster/Weapon/Weapon.h"
 #include "Blaster/GameState/BlasterGameState.h"
+#include "Components/Image.h"
 
 // 玩家控制器开始时调用
 void ABlasterPlayerController::BeginPlay()
@@ -36,6 +37,40 @@ void ABlasterPlayerController::Tick(float DeltaTime)
 	CheckTimeSync(DeltaTime);
 	// 初始化HUD
 	PollInit();
+	// 检查Ping值
+	CheckPing(DeltaTime);
+}
+
+// 检查高延迟并更新HUD
+void ABlasterPlayerController::CheckPing(float DeltaTime)
+{
+	HighPingRunningTime += DeltaTime;
+	if (HighPingRunningTime > CheckPingFrequency)
+	{
+		if (!PlayerState) PlayerState = GetPlayerState<APlayerState>();
+		if (PlayerState)
+		{
+			// ping 被压缩;其实是 ping / 4
+			if (PlayerState->GetPingInMilliseconds() * 4 > HighPingThreshold)
+			{
+				HighPingWarning();
+				PingAnimationRunningTime = 0.f;
+			}
+		}
+		HighPingRunningTime = 0.f;
+	}
+	bool bHighPingAnimationPlaying =
+		BlasterHUD && BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->HighPingAnimation &&
+		BlasterHUD->CharacterOverlay->IsAnimationPlaying(BlasterHUD->CharacterOverlay->HighPingAnimation);
+	if (bHighPingAnimationPlaying)
+	{
+		PingAnimationRunningTime += DeltaTime;
+		if (PingAnimationRunningTime > HighPingDuration)
+		{
+			StopHighPingWarning();
+		}
+	}
 }
 
 // 获取服务器时间
@@ -495,5 +530,49 @@ void ABlasterPlayerController::SetHUDShield(float Shield, float MaxShield)
 		bInitializeHealth = true;
 		HUDShield = Shield;
 		HUDMaxShield = MaxShield;
+	}
+}
+
+// 高延迟警告：显示高Ping提示动画
+void ABlasterPlayerController::HighPingWarning()
+{
+	// 获取BlasterHUD实例，如果为空则重新获取
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+	// 检查HUD是否有效，包括角色覆盖层、高Ping图片和动画
+	bool bHUDValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->HighPingImage &&
+		BlasterHUD->CharacterOverlay->HighPingAnimation;
+	if (bHUDValid)
+	{
+		// 设置高Ping图片为可见
+		BlasterHUD->CharacterOverlay->HighPingImage->SetOpacity(1.f);
+		// 播放高Ping动画，循环5次
+		BlasterHUD->CharacterOverlay->PlayAnimation(
+			BlasterHUD->CharacterOverlay->HighPingAnimation,
+			0.f,
+			5);
+	}
+}
+
+// 停止高延迟警告动画：隐藏高Ping提示
+void ABlasterPlayerController::StopHighPingWarning()
+{
+	// 获取BlasterHUD实例，如果为空则重新获取
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+	// 检查HUD是否有效，包括角色覆盖层、高Ping图片和动画
+	bool bHUDValid = BlasterHUD &&
+		BlasterHUD->CharacterOverlay &&
+		BlasterHUD->CharacterOverlay->HighPingImage &&
+		BlasterHUD->CharacterOverlay->HighPingAnimation;
+	if (bHUDValid)
+	{
+		// 设置高Ping图片为不可见
+		BlasterHUD->CharacterOverlay->HighPingImage->SetOpacity(0.f);
+		// 如果动画正在播放，则停止动画
+		if (BlasterHUD->CharacterOverlay->IsAnimationPlaying(BlasterHUD->CharacterOverlay->HighPingAnimation))
+		{
+			BlasterHUD->CharacterOverlay->StopAnimation(BlasterHUD->CharacterOverlay->HighPingAnimation);
+		}
 	}
 }
