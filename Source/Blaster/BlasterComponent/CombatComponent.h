@@ -93,6 +93,9 @@ protected:
 	// 执行开火操作
 	void Fire();
 
+	// 本地处理开火请求
+	void LocalFire(const FVector_NetQuantize& TraceHitTarget);
+
 	// 服务器端处理开火请求
 	UFUNCTION(Server, Reliable)
 	void ServerFire(const FVector_NetQuantize& TraceHitTarget);

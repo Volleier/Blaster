@@ -281,7 +281,10 @@ void AWeapon::Fire(const FVector& HitTarget)
 			}
 		}
 	}
-	SpendRound(); // 消耗弹药
+	if (HasAuthority())
+	{
+		SpendRound();// 消耗弹药
+	}
 }
 
 // 武器丢弃逻辑
