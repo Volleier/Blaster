@@ -57,13 +57,10 @@ void AWeapon::BeginPlay()
 	Super::BeginPlay();
 
 	// 仅服务器设置碰撞和绑定重叠事件
-	if (HasAuthority())
-	{
-		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		AreaSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
-		AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnSphereOverlap);
-		AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AWeapon::OnSphereEndOverlap);
-	}
+	AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	AreaSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	AreaSphere->OnComponentBeginOverlap.AddDynamic(this, &AWeapon::OnSphereOverlap);
+	AreaSphere->OnComponentEndOverlap.AddDynamic(this, &AWeapon::OnSphereEndOverlap);
 	// 默认隐藏拾取UI
 	if (PickupWidget)
 	{
