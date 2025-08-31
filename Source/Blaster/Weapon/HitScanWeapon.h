@@ -18,9 +18,6 @@ public:
 	virtual void Fire(const FVector& HitTarget) override;
 
 protected:
-	// 计算带有散射的射线终点
-	FVector TraceEndWithScatter(const FVector& TraceStart, const FVector& HitTarget);
-
 	// 执行武器射线检测，返回命中结果
 	void WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit);
 
@@ -48,20 +45,4 @@ private:
 	// 开火音效
 	UPROPERTY(EditAnywhere)
 	USoundCue* FireSound;
-
-	/**
-	 * 散射相关参数
-	 */
-
-	 // 散射球体距离
-	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
-	float DistanceToSphere = 800.f;
-
-	// 散射球体半径
-	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
-	float SphereRadius = 75.f;
-
-	// 是否启用散射
-	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
-	bool bUseScatter = false;
 };

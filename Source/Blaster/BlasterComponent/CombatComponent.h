@@ -93,6 +93,16 @@ protected:
 	// 执行开火操作
 	void Fire();
 
+	/*
+	*	根据武器类型执行不同的开火逻辑
+	*/
+	// 发射弹药武器
+	void FireProjectileWeapon();
+	//	发射命中武器
+	void FireHitScanWeapon();
+	// 发射霰弹枪
+	void FireShotgun();
+
 	// 本地处理开火请求
 	void LocalFire(const FVector_NetQuantize& TraceHitTarget);
 

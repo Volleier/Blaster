@@ -18,6 +18,16 @@ enum class EWeaponState : uint8
 	EWS_MAX UMETA(DisplayName = "默认最大值")        // 默认最大值
 };
 
+UENUM(BlueprintType)
+enum class EFireType : uint8
+{
+	EFT_HitScan UMETA(DisplayName = "Hit Scan Weapon"),  // 射线武器
+	EFT_Projectile UMETA(DisplayName = "Projectile Weapon"), // 弹药武器
+	EFT_Shotgun UMETA(DisplayName = "Shotgun Weapon"),  // 霰弹枪武器
+
+	EFT_MAX UMETA(DisplayName = "DefaultMAX")// 默认最大值
+};
+
 /*
  * 武器类，继承自AActor
  */
@@ -53,6 +63,9 @@ public:
 
 	// 增加弹药
 	void AddAmmo(int32 AmmoToAdd);
+
+    // 根据目标点进行散射射线终点计算（用于霰弹枪等武器的散射效果）
+    FVector TraceEndWithScatter(const FVector& HitTarget);
 
 	/*
 	 * 武器准星材质
@@ -101,6 +114,14 @@ public:
 	
 	// 是否销毁武器
 	bool bDestroyWeapon = false;
+
+	// 武器开火类型
+	UPROPERTY(EditAnywhere)
+	EFireType FireType;
+
+	// 是否使用散射效果（用于霰弹枪等武器）
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	bool bUseScatter = false;
 
 protected:
 	// 游戏开始时调用
@@ -190,6 +211,14 @@ private:
 	// 武器类型
 	UPROPERTY(EditAnywhere)
 	EWeaponType WeaponType;
+
+	// 武器拾取距离
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	float DistanceToSphere = 800.f;
+
+	// 武器散射球体半径
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	float SphereRadius = 75.f;
 
 public:
 	// 设置武器状态
