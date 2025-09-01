@@ -156,6 +156,16 @@ protected:
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex);
 
+	/**
+	* 带散布的跟踪端
+	*/
+	
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	float DistanceToSphere = 800.f;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	float SphereRadius = 75.f;
+
 private:
 	// 武器的骨骼网格组件
 	UPROPERTY(VisibleAnywhere, Category = "武器属性")
@@ -211,14 +221,6 @@ private:
 	// 武器类型
 	UPROPERTY(EditAnywhere)
 	EWeaponType WeaponType;
-
-	// 武器拾取距离
-	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
-	float DistanceToSphere = 800.f;
-
-	// 武器散射球体半径
-	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
-	float SphereRadius = 75.f;
 
 public:
 	// 设置武器状态

@@ -22,6 +22,14 @@ public:
 	 */
 	virtual void Fire(const FVector& HitTarget) override;
 
+
+    /**
+    * 计算霰弹枪弹丸的散射终点位置
+    * @param HitTarget 玩家瞄准的目标位置
+    * @param HitTargets 存储每个弹丸实际命中的位置
+    * 根据霰弹枪的弹丸数量和散射逻辑，生成每个弹丸的实际命中点。
+    */
+    void ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector>& HitTargets);
 private:
 	/**
 	 * 弹丸数量
