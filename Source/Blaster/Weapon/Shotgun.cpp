@@ -8,10 +8,10 @@
 
 // Shotgun类的Fire函数实现
 // 负责霰弹枪的射击逻辑，包括弹道检测、伤害统计、特效和音效播放
-void AShotgun::Fire(const FVector& HitTarget)
+void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 {
 	// 调用父类武器的Fire方法
-	AWeapon::Fire(HitTarget);
+	AWeapon::Fire(FVector());
 
 	// 获取武器拥有者的Pawn对象
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
@@ -26,15 +26,15 @@ void AShotgun::Fire(const FVector& HitTarget)
 	if (MuzzleFlashSocket)
 	{
 		// 获取插槽的变换信息
-		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
-		// 获取插槽的位置作为射击起点
-		FVector Start = SocketTransform.GetLocation();
-
+		const FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(GetWeaponMesh());
+		// 获取插槽向量坐标的作为射击起点
+		const FVector Start = SocketTransform.GetLocation();
+		
 		// 用于统计每个角色被击中的弹丸数量
 		TMap<ABlasterCharacter*, uint32> HitMap;
 
 		// 循环发射所有弹丸
-		for (uint32 i = 0; i < NumberOfPellets; i++)
+		for (FVector_NetQuantize HitTarget : HitTargets)
 		{
 			FHitResult FireHit;
 			// 进行弹道检测，获取击中结果
@@ -42,7 +42,7 @@ void AShotgun::Fire(const FVector& HitTarget)
 
 			// 判断是否击中BlasterCharacter角色
 			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor());
-			if (BlasterCharacter && HasAuthority() && InstigatorController)
+			if (BlasterCharacter)
 			{
 				// 统计该角色被击中的弹丸数量
 				if (HitMap.Contains(BlasterCharacter))
@@ -53,27 +53,28 @@ void AShotgun::Fire(const FVector& HitTarget)
 				{
 					HitMap.Emplace(BlasterCharacter, 1);
 				}
-			}
 
-			// 播放击中粒子特效
-			if (ImpactParticles)
-			{
-				UGameplayStatics::SpawnEmitterAtLocation(
-					GetWorld(),
-					ImpactParticles,
-					FireHit.ImpactPoint,
-					FireHit.ImpactNormal.Rotation());
-			}
 
-			// 播放击中音效
-			if (HitSound)
-			{
-				UGameplayStatics::PlaySoundAtLocation(
-					this,
-					HitSound,
-					FireHit.ImpactPoint,
-					.5f,
-					FMath::FRandRange(-.5f, .5f));
+				// 播放击中粒子特效
+				if (ImpactParticles)
+				{
+					UGameplayStatics::SpawnEmitterAtLocation(
+						GetWorld(),
+						ImpactParticles,
+						FireHit.ImpactPoint,
+						FireHit.ImpactNormal.Rotation());
+				}
+
+				// 播放击中音效
+				if (HitSound)
+				{
+					UGameplayStatics::PlaySoundAtLocation(
+						this,
+						HitSound,
+						FireHit.ImpactPoint,
+						.5f,
+						FMath::FRandRange(-.5f, .5f));
+				}
 			}
 		}
 
@@ -83,7 +84,7 @@ void AShotgun::Fire(const FVector& HitTarget)
 			if (HitPair.Key && HasAuthority() && InstigatorController)
 			{
 				UGameplayStatics::ApplyDamage(
-					HitPair.Key,
+					HitPair.Key,	// 角色击中
 					Damage * HitPair.Value, // 总伤害 = 单颗弹丸伤害 * 命中次数
 					InstigatorController,
 					this,
@@ -94,7 +95,7 @@ void AShotgun::Fire(const FVector& HitTarget)
 }
 
 // 计算霰弹枪弹丸的散射终点位置
-void AShotgun::ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector>& HitTargets)
+void AShotgun::ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector_NetQuantize>& HitTargets)
 {
 	const USkeletalMeshSocket* MuzzleFlashSocket = GetWeaponMesh()->GetSocketByName("MuzzleFlash");
 	if (MuzzleFlashSocket == nullptr) return;

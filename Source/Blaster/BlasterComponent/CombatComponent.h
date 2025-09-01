@@ -106,6 +106,9 @@ protected:
 	// 本地处理开火请求
 	void LocalFire(const FVector_NetQuantize& TraceHitTarget);
 
+	// 本地处理霰弹枪开火请求
+	void ShotgunLocalFire(const TArray<FVector_NetQuantize>& TraceHitTargets);
+
 	// 服务器端处理开火请求
 	UFUNCTION(Server, Reliable)
 	void ServerFire(const FVector_NetQuantize& TraceHitTarget);
@@ -113,6 +116,14 @@ protected:
 	// 多播开火事件
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastFire(const FVector_NetQuantize& TraceHitTarget);
+
+	// 服务器端处理霰弹枪开火请求
+	UFUNCTION(Server, Reliable)
+	void ServerShotgunFire(const TArray<FVector_NetQuantize>& TraceHitTargets);
+
+	// 多播霰弹枪开火事件
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastShotgunFire(const TArray<FVector_NetQuantize>& TraceHitTargets);
 
 	// 在准星下进行射线检测
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
