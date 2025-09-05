@@ -142,6 +142,7 @@ void AWeapon::ClientUpdateAmmo_Implementation(int32 ServerAmmo)
 	SetHUDAmmo();
 }
 
+// 增加弹药
 void AWeapon::AddAmmo(int32 AmmoToAdd)
 {
 	Ammo = FMath::Clamp(Ammo + AmmoToAdd, 0, MagCapacity);
@@ -149,6 +150,7 @@ void AWeapon::AddAmmo(int32 AmmoToAdd)
 	ClientAddAmmo(AmmoToAdd);
 }
 
+// 增加弹药同步回调
 void AWeapon::ClientAddAmmo_Implementation(int32 AmmoToAdd)
 {
 	if (HasAuthority()) return;
@@ -316,13 +318,6 @@ void AWeapon::Dropped()
 	SetOwner(nullptr);
 	BlasterOwnerCharacter = nullptr;
 	BlasterOwnerController = nullptr;
-}
-
-// 增加弹药
-void AWeapon::AddAmmo(int32 AmmoToAdd)
-{
-	Ammo = FMath::Clamp(Ammo - AmmoToAdd, 0, MagCapacity);
-	SetHUDAmmo();
 }
 
 // 判断弹药是否为空
