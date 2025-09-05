@@ -196,12 +196,15 @@ private:
 	TSubclassOf<class ACasing> CasingClass;
 
 	// 当前弹药数量，使用OnRep_Ammo进行网络同步
-	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_Ammo)
+	UPROPERTY(EditAnywhere)
 	int32 Ammo;
 
 	// 当弹药数量发生变化时调用
-	UFUNCTION()
-	void OnRep_Ammo();
+	UFUNCTION(Client, Reliable)
+	void ClientUpdateAmmo(int32 ServerAmmo);
+
+	UFUNCTION(Client, Reliable)
+	void ClientAddAmmo(int32 AmmoToAdd);
 
 	// 消耗一发子弹
 	void SpendRound();
@@ -209,6 +212,9 @@ private:
 	// 弹匣容量
 	UPROPERTY(EditAnywhere)
 	int32 MagCapacity;
+
+	// 未处理的弹药服务器请求数量
+	int32 Sequence = 0;
 
 	// 武器拥有者角色指针
 	UPROPERTY()
