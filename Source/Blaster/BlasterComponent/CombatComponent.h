@@ -71,6 +71,9 @@ public:
 	// 捡起弹药
 	void PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount);
 
+	// 是否本地装填
+	bool bLocallyReloading = false;
+
 protected:
 	// 初始化
 	virtual void BeginPlay() override;

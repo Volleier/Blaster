@@ -419,4 +419,7 @@ public:
 
 	// 获取BUFF组件
 	FORCEINLINE UBuffComponent* GetBuff() const { return Buff; }
+
+	// 设置是否本地装填
+	bool IsLocallyReloading();
 };

@@ -189,7 +189,10 @@ void UCombatComponent::SetHUDCrosshairs(float DeltaTime)
 // 播放换弹动画
 void UCombatComponent::HandleReload()
 {
-	Character->PlayReloadMontage();
+	if (Character)
+	{
+		Character->PlayReloadMontage();
+	}
 }
 
 // 计算可装填弹药数量
@@ -338,7 +341,7 @@ void UCombatComponent::ServerReload_Implementation()
 	if (Character == nullptr || EquippedWeapon == nullptr)
 		return;
 	CombatState = ECombatState::ECS_Reloading;
-	HandleReload();
+	if (Character && !Character->IsLocallyControlled()) HandleReload();
 }
 
 // 战斗状态复制回调
@@ -390,6 +393,7 @@ void UCombatComponent::FinishReloading()
 {
 	if (Character == nullptr)
 		return;
+	bLocallyReloading = false;
 	if (Character->HasAuthority())
 	{
 		CombatState = ECombatState::ECS_Unoccupied;
@@ -404,9 +408,11 @@ void UCombatComponent::FinishReloading()
 // 换弹逻辑
 void UCombatComponent::Reload()
 {
-	if (CarriedAmmo > 0 && CombatState == ECombatState::ECS_Unoccupied && EquippedWeapon && !EquippedWeapon->IsFull())
+	if (CarriedAmmo > 0 && CombatState == ECombatState::ECS_Unoccupied && EquippedWeapon && !EquippedWeapon->IsFull() && !bLocallyReloading)
 	{
 		ServerReload();
+		HandleReload();
+		bLocallyReloading = true;
 	}
 }
 
@@ -473,6 +479,8 @@ void UCombatComponent::FireTimerFinished()
 bool UCombatComponent::CanFire()
 {
 	if (EquippedWeapon == nullptr)
+		return false;
+	if (bLocallyReloading) 
 		return false;
 	if (!EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
 		return true;
