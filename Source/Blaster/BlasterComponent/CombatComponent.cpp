@@ -276,6 +276,14 @@ void UCombatComponent::UpdateHUDGrenades()
 	}
 }
 
+void UCombatComponent::OnRep_Aiming()
+{
+	if(Character && Character->IsLocallyControlled())
+	{
+		bAiming = bAimButtonPressed;
+	}
+}
+
 // 弹夹为空时自动换弹
 void UCombatComponent::ReloadEmptyWeapon()
 {
@@ -517,6 +525,7 @@ void UCombatComponent::SetAiming(bool bIsAiming)
 	{
 		Character->ShowSniperScopeWidget(bIsAiming);
 	}
+	if (Character->IsLocallyControlled()) bAimButtonPressed = bIsAiming;
 }
 
 // 服务器端设置瞄准状态

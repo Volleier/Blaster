@@ -225,8 +225,15 @@ private:
 	AWeapon* SecondaryWeapon;
 
 	// 是否处于瞄准状态（同步）
-	UPROPERTY(Replicated)
-	bool bAiming;
+	UPROPERTY(ReplicatedUsing = OnRep_Aiming)
+	bool bAiming = false;
+
+	// 是否点击瞄准键
+	bool bAimButtonPressed = false;
+
+	// 瞄准状态同步回调
+	UFUNCTION()
+	void OnRep_Aiming();
 
 	// 基础行走速度
 	UPROPERTY(EditAnywhere)
