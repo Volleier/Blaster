@@ -481,9 +481,14 @@ bool UCombatComponent::CanFire()
 	if (EquippedWeapon == nullptr)
 		return false;
 	if (bLocallyReloading) 
-		return false;
-	if (!EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
-		return true;
+	{
+		// 允许在重新装填时开枪
+		if (!EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Reloading && EquippedWeapon->GetWeaponType() == EWeaponType::EWT_Shotgun)
+		{
+			bLocallyReloading = false;
+			return true;
+		}
+	}
 	return !EquippedWeapon->IsEmpty() && bCanFire && CombatState == ECombatState::ECS_Unoccupied;
 }
 
