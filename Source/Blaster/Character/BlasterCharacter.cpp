@@ -22,6 +22,7 @@
 #include "Blaster/BlasterComponent/BuffComponent.h"
 #include "Blaster/Weapon/WeaponTypes.h"
 #include "Components/BoxComponent.h"
+#include "Blaster/BlasterComponent/LagCompensationComponent.h"
 
 // 构造函数，初始化角色各组件和属性
 ABlasterCharacter::ABlasterCharacter()
@@ -53,6 +54,9 @@ ABlasterCharacter::ABlasterCharacter()
 	// 创建并初始化Buff组件（管理加速、跳跃等Buff效果）
 	Buff = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffComponent"));
 	Buff->SetIsReplicated(true); // Buff组件支持网络复制
+
+	// 创建并初始化延迟补偿组件（用于网络延迟补偿）
+	LagCompensation = CreateDefaultSubobject<ULagCompensationComponent>(TEXT("LagCompensation"));
 
 	// 允许角色蹲下
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
@@ -405,6 +409,14 @@ void ABlasterCharacter::PostInitializeComponents()
 			GetCharacterMovement()->MaxWalkSpeed,
 			GetCharacterMovement()->MaxWalkSpeedCrouched);
 		Buff->SetInitialJumpVelocity(GetCharacterMovement()->JumpZVelocity);
+	}
+	if (LagCompensation)
+	{
+		LagCompensation->Character = this;
+		if (Controller)
+		{
+			LagCompensation->Controller = Cast<ABlasterPlayerController>(Controller);
+		}
 	}
 }
 

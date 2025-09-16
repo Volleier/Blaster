@@ -242,6 +242,10 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	class UBuffComponent* Buff;
 
+	// 延迟补偿组件
+	UPROPERTY(VisibleAnywhere)
+	class ULagCompensationComponent* LagCompensation;
+
 	// 服务器端装备按钮按下
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();
