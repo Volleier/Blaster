@@ -488,4 +488,7 @@ public:
 
 	// 设置是否本地装填
 	bool IsLocallyReloading();
+
+	// 设置延迟组件
+	FORCEINLINE ULagCompensationComponent* GetLagCompensation() const { return LagCompensation; }
 };

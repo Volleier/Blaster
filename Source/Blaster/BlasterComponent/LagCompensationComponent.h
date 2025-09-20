@@ -50,6 +50,13 @@ public:
 	// 保存当前帧的命中盒信息
 	void ShowFramePackage(const FFramePackage& Package, const FColor& Color);
 
+	// 服务器端回放功能，处理命中检测和伤害应用
+	void ServerSideRewind(
+		class ABlasterCharacter* HitCharacter,
+		const FVector_NetQuantize& TraceStart,
+		const FVector_NetQuantize& HitLocation,
+		float HitTime);
+
 protected:
 	virtual void BeginPlay() override;
 
