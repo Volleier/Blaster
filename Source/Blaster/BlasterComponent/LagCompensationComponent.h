@@ -64,4 +64,11 @@ private:
 	// Blaster角色的控制器
 	UPROPERTY()
 	class ABlasterPlayerController* Controller;
+
+	// 历史帧数据的双向链表
+	TDoubleLinkedList<FFramePackage> FrameHistory;
+
+	// 最大记录时间（秒）
+	UPROPERTY(EditAnywhere)
+	float MaxRecordTime = 4.f;
 };
