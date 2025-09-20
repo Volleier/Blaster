@@ -42,11 +42,21 @@ class BLASTER_API ULagCompensationComponent : public UActorComponent
 public:	
 	ULagCompensationComponent();
 
+	// 允许BlasterCharacter类访问LagCompensationComponent的私有成员
 	friend class ABlasterCharacter;
+
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	// 保存当前帧的命中盒信息
+	void ShowFramePackage(const FFramePackage& Package, const FColor& Color);
 
 protected:
 	virtual void BeginPlay() override;
 
+	// 保存历史帧数据的数组
+	void SaveFramePackage(FFramePackage& Package);
+
+private:
 	// Blaster角色
 	UPROPERTY()
 	ABlasterCharacter* Character;
@@ -54,8 +64,4 @@ protected:
 	// Blaster角色的控制器
 	UPROPERTY()
 	class ABlasterPlayerController* Controller;
-public:	
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-		
 };

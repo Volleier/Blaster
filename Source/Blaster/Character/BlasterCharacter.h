@@ -84,6 +84,9 @@ public:
 	// 设置默认武器
 	void SpawnDefaultWeapon();
 
+	// 击中碰撞箱
+	UPROPERTY()
+	TMap<FName, class UBoxComponent*> HitCollisionBoxes;
 protected:
 	// 游戏开始时调用
 	virtual void BeginPlay() override;
