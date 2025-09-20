@@ -63,6 +63,9 @@ protected:
 	// 保存历史帧数据的数组
 	void SaveFramePackage(FFramePackage& Package);
 
+	// 帧之间插入
+	FFramePackage InterpBetweenFrames(const FFramePackage& OlderFrame, const FFramePackage& YoungerFrame, float HitTime);
+
 private:
 	// Blaster角色
 	UPROPERTY()
