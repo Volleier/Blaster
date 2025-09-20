@@ -33,6 +33,18 @@ struct FFramePackage
 	TMap<FName, FBoxInformation> HitBoxInfo;
 };
 
+// FServerSideRewindResult 结构体用于存储服务器端回放的结果，包括是否命中和是否爆头
+USTRUCT(BlueprintType)
+struct FServerSideRewindResult
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	bool bHitConfirmed;
+
+	UPROPERTY()
+	bool bHeadShot;
+};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BLASTER_API ULagCompensationComponent : public UActorComponent
@@ -51,7 +63,7 @@ public:
 	void ShowFramePackage(const FFramePackage& Package, const FColor& Color);
 
 	// 服务器端回放功能，处理命中检测和伤害应用
-	void ServerSideRewind(
+	FServerSideRewindResult ServerSideRewind(
 		class ABlasterCharacter* HitCharacter,
 		const FVector_NetQuantize& TraceStart,
 		const FVector_NetQuantize& HitLocation,
@@ -65,6 +77,25 @@ protected:
 
 	// 帧之间插入
 	FFramePackage InterpBetweenFrames(const FFramePackage& OlderFrame, const FFramePackage& YoungerFrame, float HitTime);
+
+	// 确认命中
+	FServerSideRewindResult ConfirmHit(
+		const FFramePackage& Package,
+		ABlasterCharacter* HitCharacter,
+		const FVector_NetQuantize& TraceStart,
+		const FVector_NetQuantize& HitLocation);
+
+	// 保存命中盒的位置
+	void CacheBoxPositions(ABlasterCharacter* HitCharacter, FFramePackage& OutFramePackage);
+
+	// 移动命中盒到指定位置
+	void MoveBoxes(ABlasterCharacter* HitCharacter, const FFramePackage& Package);
+	
+	// 重置命中盒到原始位置
+	void ResetHitBoxes(ABlasterCharacter* HitCharacter, const FFramePackage& Package);
+	
+	// 启用或禁用角色网格的碰撞
+	void EnableCharacterMeshCollision(ABlasterCharacter* HitCharacter, ECollisionEnabled::Type CollisionEnabled);
 
 private:
 	// Blaster角色
