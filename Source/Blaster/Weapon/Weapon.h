@@ -165,6 +165,22 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
 	float SphereRadius = 75.f;
+	 
+	// 武器伤害值
+	UPROPERTY()
+	float Damage = 20.f;
+	
+	// 是否使用服务器端回放（用于网络同步）
+	UPROPERTY()
+	bool bUseServerSideRewind = false;
+
+	// 武器拥有者角色
+	UPROPERTY()
+	class ABlasterCharacter* BlasterOwnerCharacter;
+
+	// 武器拥有者控制器
+	UPROPERTY()
+	class ABlasterPlayerController* BlasterOwnerController;
 
 private:
 	// 武器的骨骼网格组件
@@ -216,14 +232,6 @@ private:
 	// 未处理的弹药服务器请求数量
 	int32 Sequence = 0;
 
-	// 武器拥有者角色指针
-	UPROPERTY()
-	class ABlasterCharacter* BlasterOwnerCharacter;
-
-	// 武器拥有者控制器指针
-	UPROPERTY()
-	class ABlasterPlayerController* BlasterOwnerController;
-
 	// 武器类型
 	UPROPERTY(EditAnywhere)
 	EWeaponType WeaponType;
@@ -258,4 +266,7 @@ public:
 
 	// 获取弹匣容量
 	FORCEINLINE int32 GetMagCapacity() const { return MagCapacity; }
+
+	// 获取武器伤害
+	FORCEINLINE int32 GetDamage() const { return Damage; }
 };

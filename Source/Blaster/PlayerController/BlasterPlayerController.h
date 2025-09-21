@@ -115,6 +115,11 @@ public:
 	 */
 	void HandleCooldown();
 
+	/**
+	 * 单程时间
+	*/
+	float SingleTripTime = 0.f;
+
 protected:
 	/**
 	 * 游戏开始时调用

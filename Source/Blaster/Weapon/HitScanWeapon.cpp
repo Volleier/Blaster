@@ -6,6 +6,8 @@
 #include "Sound/SoundCue.h"
 #include "WeaponTypes.h"
 #include "DrawDebugHelpers.h"
+#include "Blaster/PlayerController/BlasterPlayerController.h"
+#include "Blaster/BlasterComponent/LagCompensationComponent.h"
 
 // 命中扫描武器的开火逻辑
 void AHitScanWeapon::Fire(const FVector& HitTarget)
@@ -34,15 +36,32 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 
 		// 判断是否命中BlasterCharacter，并且有权限和控制器
 		ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor());
-		if (BlasterCharacter && HasAuthority() && InstigatorController)
+		if (BlasterCharacter && InstigatorController)
 		{
-			// 应用伤害
-			UGameplayStatics::ApplyDamage(
-				BlasterCharacter,
-				Damage,
-				InstigatorController,
-				this,
-				UDamageType::StaticClass());
+			if(HasAuthority() && !bUseServerSideRewind)
+			{
+				UGameplayStatics::ApplyDamage(
+					BlasterCharacter,
+					Damage,
+					InstigatorController,
+					this,
+					UDamageType::StaticClass());
+			}
+			if (!HasAuthority() && bUseServerSideRewind)
+			{
+				BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(OwnerPawn) : BlasterOwnerCharacter;
+				BlasterOwnerController = BlasterOwnerController == nullptr ? Cast<ABlasterPlayerController>(InstigatorController) : BlasterOwnerController;
+				if(BlasterOwnerController && BlasterOwnerCharacter && BlasterOwnerCharacter->GetLagCompensation() )
+				{
+					BlasterOwnerCharacter->GetLagCompensation()->ServerScoreRequest(
+						BlasterCharacter,
+						Start,
+						HitTarget,
+						BlasterOwnerController->GetServerTime() - BlasterOwnerController->SingleTripTime,
+						this
+					);
+				}
+			}
 		}
 		// 播放命中粒子特效
 		if (ImpactParticles)

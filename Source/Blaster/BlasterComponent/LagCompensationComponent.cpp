@@ -1,13 +1,17 @@
 #include "LagCompensationComponent.h"
 #include "Blaster/Character/BlasterCharacter.h"
+#include "Blaster/Weapon/Weapon.h"
 #include "Components/BoxComponent.h"
+#include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
+
 #include "DrawDebugHelpers.h"
 
 ULagCompensationComponent::ULagCompensationComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-}
 
+}
 
 void ULagCompensationComponent::BeginPlay()
 {
@@ -67,7 +71,7 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 	MoveBoxes(HitCharacter, Package);
 	EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::NoCollision);
 
-	// 启用头部碰撞盒进行初步检测
+	// Enable collision for the head first
 	UBoxComponent* HeadBox = HitCharacter->HitCollisionBoxes[FName("head")];
 	HeadBox->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	HeadBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
@@ -83,13 +87,13 @@ FServerSideRewindResult ULagCompensationComponent::ConfirmHit(const FFramePackag
 			TraceEnd,
 			ECollisionChannel::ECC_Visibility
 		);
-		if (ConfirmHitResult.bBlockingHit) // 如果击中头部提前返回
+		if (ConfirmHitResult.bBlockingHit) // we hit the head, return early
 		{
 			ResetHitBoxes(HitCharacter, CurrentFrame);
 			EnableCharacterMeshCollision(HitCharacter, ECollisionEnabled::QueryAndPhysics);
 			return FServerSideRewindResult{ true, true };
 		}
-		else // 如果没有击中头部，启用其他碰撞盒进行检测
+		else // didn't hit head, check the rest of the boxes
 		{
 			for (auto& HitBoxPair : HitCharacter->HitCollisionBoxes)
 			{
@@ -190,23 +194,22 @@ void ULagCompensationComponent::ShowFramePackage(const FFramePackage& Package, c
 
 FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime)
 {
-	// 判断是否需要返回
 	bool bReturn =
 		HitCharacter == nullptr ||
 		HitCharacter->GetLagCompensation() == nullptr ||
 		HitCharacter->GetLagCompensation()->FrameHistory.GetHead() == nullptr ||
 		HitCharacter->GetLagCompensation()->FrameHistory.GetTail() == nullptr;
 	if (bReturn) return FServerSideRewindResult();
-	// 用于验证命中的帧包
+	// Frame package that we check to verify a hit
 	FFramePackage FrameToCheck;
 	bool bShouldInterpolate = true;
-	// 命中角色的帧历史
+	// Frame history of the HitCharacter
 	const TDoubleLinkedList<FFramePackage>& History = HitCharacter->GetLagCompensation()->FrameHistory;
 	const float OldestHistoryTime = History.GetTail()->GetValue().Time;
 	const float NewestHistoryTime = History.GetHead()->GetValue().Time;
 	if (OldestHistoryTime > HitTime)
 	{
-		// 太久远了，延迟过大，无法进行服务器端回溯
+		// too far back - too laggy to do SSR
 		return FServerSideRewindResult();
 	}
 	if (OldestHistoryTime == HitTime)
@@ -220,12 +223,11 @@ FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(ABlasterChar
 		bShouldInterpolate = false;
 	}
 
-	// 找到比命中时间更年轻和更年长的帧
 	TDoubleLinkedList<FFramePackage>::TDoubleLinkedListNode* Younger = History.GetHead();
 	TDoubleLinkedList<FFramePackage>::TDoubleLinkedListNode* Older = Younger;
-	while (Older->GetValue().Time > HitTime) // Older是否比命中时间年轻
+	while (Older->GetValue().Time > HitTime) // is Older still younger than HitTime?
 	{
-		// 向后遍历，直到找到 OlderTime < HitTime < YoungerTime
+		// March back until: OlderTime < HitTime < YoungerTime
 		if (Older->GetNextNode() == nullptr) break;
 		Older = Older->GetNextNode();
 		if (Older->GetValue().Time > HitTime)
@@ -233,23 +235,46 @@ FServerSideRewindResult ULagCompensationComponent::ServerSideRewind(ABlasterChar
 			Younger = Older;
 		}
 	}
-	if (Older->GetValue().Time == HitTime) // 极少发生，刚好找到对应帧
+	if (Older->GetValue().Time == HitTime) // highly unlikely, but we found our frame to check
 	{
 		FrameToCheck = Older->GetValue();
 		bShouldInterpolate = false;
 	}
 	if (bShouldInterpolate)
 	{
-		// 在Younger和Older之间插值
+		// Interpolate between Younger and Older
 		FrameToCheck = InterpBetweenFrames(Older->GetValue(), Younger->GetValue(), HitTime);
 	}
 
 	return ConfirmHit(FrameToCheck, HitCharacter, TraceStart, HitLocation);
 }
 
+void ULagCompensationComponent::ServerScoreRequest_Implementation(ABlasterCharacter* HitCharacter, const FVector_NetQuantize& TraceStart, const FVector_NetQuantize& HitLocation, float HitTime, AWeapon* DamageCauser)
+{
+	FServerSideRewindResult Confirm = ServerSideRewind(HitCharacter, TraceStart, HitLocation, HitTime);
+
+	if (Character && HitCharacter && DamageCauser && Confirm.bHitConfirmed)
+	{
+		UGameplayStatics::ApplyDamage(
+			HitCharacter,
+			DamageCauser->GetDamage(),
+			Character->Controller,
+			DamageCauser,
+			UDamageType::StaticClass()
+		);
+	}
+}
+
 void ULagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	SaveFramePackage();
+}
+
+void ULagCompensationComponent::SaveFramePackage()
+{
+	if (Character == nullptr || !Character->HasAuthority()) return;
 	if (FrameHistory.Num() <= 1)
 	{
 		FFramePackage ThisFrame;
@@ -271,4 +296,3 @@ void ULagCompensationComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 		ShowFramePackage(ThisFrame, FColor::Red);
 	}
 }
-

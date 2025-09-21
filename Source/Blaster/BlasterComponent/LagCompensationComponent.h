@@ -69,6 +69,16 @@ public:
 		const FVector_NetQuantize& HitLocation,
 		float HitTime);
 
+	// 服务器端处理客户端的命中请求
+	UFUNCTION(Server, Reliable)
+	void ServerScoreRequest(
+		ABlasterCharacter* HitCharacter,
+		const FVector_NetQuantize& TraceStart,
+		const FVector_NetQuantize& HitLocation,
+		float HitTime,
+		class AWeapon* DamageCauser
+	);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -96,6 +106,9 @@ protected:
 	
 	// 启用或禁用角色网格的碰撞
 	void EnableCharacterMeshCollision(ABlasterCharacter* HitCharacter, ECollisionEnabled::Type CollisionEnabled);
+
+	// 保存帧包裹
+	void SaveFramePackage();
 
 private:
 	// Blaster角色
